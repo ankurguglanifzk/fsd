@@ -1,0 +1,277 @@
+/* src/pages/LoginPage.css */
+.login-page-container {
+    min-height: 100vh;
+    background-color: #0f172a; /* bg-slate-900 */
+    display: flex;
+    flex-direction: column;
+    /* items-center is removed to allow Header to be full width */
+    /* justify-content: center; /* This will be handled by the main content wrapper */
+    padding: 0; /* Remove padding if header is full width */
+    font-family: sans-serif; /* font-sans */
+  }
+  
+  .login-page-container ::selection {
+    background-color: #0369a1; /* sky-700 */
+    color: #ffffff;
+  }
+  
+  /* Wrapper for the content below the header, to center it */
+  .login-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1; /* Takes remaining space after header */
+    padding: 1rem; /* Re-apply padding here */
+    width: 100%;
+  }
+  
+  
+  .login-card {
+    width: 100%;
+    max-width: 28rem; /* max-w-md */
+    background-color: #1e293b; /* bg-slate-800 */
+    padding: 2rem 2.5rem; /* p-8 md:p-10 (using a mid-value) */
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-2xl */
+    border: 1px solid #334155; /* border-slate-700 */
+  }
+  
+  .login-header {
+    text-align: center;
+    margin-bottom: 2rem; /* mb-8 */
+  }
+  
+  /* .login-logo class can be removed if logo is only in Header.js */
+  
+  .login-title {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: 700; /* font-bold */
+    color: #0ea5e9; /* text-sky-500 */
+  }
+  
+  .login-subtitle {
+    color: #94a3b8; /* text-slate-400 */
+    margin-top: 0.5rem; /* mt-2 */
+  }
+  
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* space-y-6 */
+  }
+  
+  .form-group {
+    /* Container for label + input if needed, or apply styles directly */
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    color: #cbd5e1; /* text-slate-300 */
+    margin-bottom: 0.25rem; /* mb-1 */
+    text-align: center; /* Centering the label text */
+  }
+  
+  .form-input {
+    
+    margin-top: 0.25rem; /* mt-1 */
+    display: block;
+    width: 420px;
+    padding: 0.75rem 1rem; /* px-4 py-3 */
+    background-color: #334155; /* bg-slate-700 */
+    border: 1px solid #475569; /* border-slate-600 */
+    border-radius: 0.5rem; /* rounded-lg */
+    color: #f1f5f9; /* text-slate-100 */
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  .form-input::placeholder {
+    
+    color: #64748b; /* placeholder-slate-500 */
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #0ea5e9; /* focus:border-sky-500 */
+    box-shadow: 0 0 0 2px #0ea5e9; /* focus:ring-2 focus:ring-sky-500 */
+  }
+  
+  .password-input-container {
+    position: relative;
+    width: 410px;
+  }
+  
+  .password-toggle-button {
+    
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    padding-right: 0.75rem; /* pr-3 */
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem; /* text-sm */
+    line-height: 1.25rem; /* leading-5 */
+    color: #94a3b8; /* text-slate-400 */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out;
+  }
+  
+  .password-toggle-button:hover {
+    color: #38bdf8; /* hover:text-sky-400 */
+  }
+  
+  /* Remember Me Section Styles */
+  .remember-me-container {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center the checkbox and label */
+    margin-top: 0.5rem; /* Add some space above */
+    margin-bottom: 0.5rem; /* Add some space below */
+  }
+  
+  .remember-me-checkbox {
+    height: 1rem; /* h-4 */
+    width: 1rem; /* w-4 */
+    border-radius: 0.25rem; /* rounded */
+    border: 1px solid #475569; /* border-slate-600 */
+    background-color: #334155; /* bg-slate-700 */
+    color: #0ea5e9; /* text-sky-500 - for the checkmark color */
+    margin-right: 0.5rem; /* mr-2 */
+    cursor: pointer;
+    /* Removes default appearance for better custom styling if needed */
+    /* -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none; */
+    /* Basic focus style */
+  }
+  .remember-me-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #0ea5e9; /* focus:ring-sky-500 */
+  }
+  /* Style for when checkbox is checked (using accent-color for simplicity) */
+  .remember-me-checkbox {
+      accent-color: #0ea5e9; /* sky-500 */
+  }
+  
+  
+  .remember-me-label {
+    font-size: 0.875rem; /* text-sm */
+    color: #cbd5e1; /* text-slate-300 */
+    cursor: pointer;
+  }
+  
+  
+  .error-message-container {
+    background-color: rgba(239, 68, 68, 0.1); /* bg-red-500/10 */
+    border: 1px solid rgba(239, 68, 68, 0.3); /* border-red-500/30 */
+    color: #fca5a5; /* text-red-300 */
+    padding: 0.75rem 1rem; /* px-4 py-3 */
+    border-radius: 0.5rem; /* rounded-lg */
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem; /* text-sm */
+  }
+  
+  .error-icon {
+    margin-right: 0.5rem; /* mr-2 */
+    color: #f87171; /* text-red-400 */
+    flex-shrink: 0;
+  }
+  
+  .submit-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem; /* px-4 py-3 */
+    border: 1px solid transparent;
+    font-size: 1rem; /* text-base */
+    font-weight: 500; /* font-medium */
+    border-radius: 0.5rem; /* rounded-lg */
+    color: #0f172a; /* text-slate-900 */
+    background-color: #0ea5e9; /* bg-sky-500 */
+    transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #0284c7; /* hover:bg-sky-600 */
+  }
+  
+  .submit-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px #0ea5e9; /* focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 */
+  }
+  
+  .submit-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .loading-icon {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .login-footer {
+    text-align: center;
+    font-size: 0.75rem; /* text-xs */
+    color: #475569; /* text-slate-600 */
+   
+    margin-top: 2.5rem; /* mt-10 */
+  }
+
+  .oauth-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    font-weight: 500;
+    color: #888;
+  }
+  
+  .google-login-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .google-login-button {
+    width: 500px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+    justify-content: center; /* center content horizontally */
+  
+  }
+  
+  .google-login-button:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .google-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  

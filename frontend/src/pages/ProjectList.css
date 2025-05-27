@@ -1,0 +1,114 @@
+/* src/components/ProjectList.css */
+
+.project-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: calc(100vh - 250px); /* Example: Adjust based on header/other elements height */
+    overflow-y: auto; /* Allow scrolling for long project lists */
+  }
+  
+  .project-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 0.75rem; /* Adjusted padding */
+    margin-bottom: 0.35rem; /* Slightly increased margin */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    border: 1px solid transparent; /* For smooth transition on hover/select */
+    color: #e0e0e0; /* Default text color */
+  }
+  
+  .project-list-item:hover {
+    background-color: #2c3e50; /* Darker blue-gray hover */
+    border-color: #34495e;
+  }
+  
+  .project-list-item.selected {
+    background-color: #007bff; /* Blue for selected item */
+    color: #ffffff;
+    font-weight: bold;
+    border-color: #0056b3;
+  }
+  
+  .project-list-item.selected:hover {
+    background-color: #0069d9; /* Slightly darker blue on hover when selected */
+  }
+  
+  .project-info {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 0.75rem; /* Increased space before action buttons */
+  }
+  
+  .project-actions {
+    display: flex;
+    gap: 0.6rem; /* Slightly increased gap */
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+  }
+  
+  .project-edit-button,
+  .project-delete-button {
+    background: none;
+    border: none;
+    color: #bdc3c7; /* Light gray icon color */
+    cursor: pointer;
+    padding: 0.3rem; /* Slightly larger touch target */
+    font-size: 1rem; /* Adjust icon size if needed */
+    transition: color 0.2s ease;
+    line-height: 1; /* Ensure icon is vertically centered */
+  }
+  
+  .project-edit-button:hover,
+  .project-delete-button:hover {
+    color: #3498db; /* Blue hover for edit */
+  }
+  
+  .project-delete-button:hover {
+    color: #e74c3c; /* Red hover for delete */
+  }
+  
+  .project-list-item.selected .project-edit-button,
+  .project-list-item.selected .project-delete-button {
+    color: #ecf0f1; /* Lighter icons when item is selected */
+  }
+  
+  .project-list-item.selected .project-edit-button:hover {
+    color: #ffffff;
+  }
+  .project-list-item.selected .project-delete-button:hover {
+    color: #f5c6cb; /* Lighter red on selected hover */
+  }
+  
+  
+  .info-message {
+    padding: 1rem;
+    text-align: center;
+    color: #95a5a6; /* Muted text color for info messages */
+    font-style: italic;
+  }
+  
+  /* Scrollbar styling for project list (Webkit browsers) */
+  .project-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .project-list::-webkit-scrollbar-track {
+    background: #2c2c2c; /* Dark track */
+    border-radius: 10px;
+  }
+  
+  .project-list::-webkit-scrollbar-thumb {
+    background-color: #555; /* Darker gray thumb */
+    border-radius: 10px;
+    border: 2px solid #2c2c2c; /* Creates padding around thumb */
+  }
+  
+  .project-list::-webkit-scrollbar-thumb:hover {
+    background-color: #777; /* Lighter thumb on hover */
+  }
+  

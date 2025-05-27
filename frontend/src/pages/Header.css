@@ -1,0 +1,65 @@
+/* Main header container */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem; /* 12px */
+  background-color: #2d3748; /* gray-800 */
+  color: #ffffff;
+  position: relative;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  height: 4.5rem; /* consistent height */
+}
+
+/* Logo container and image */
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  height: 5rem; /* 48px */
+  width: auto;
+}
+
+/* Centered title */
+.header-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.75rem; /* ~28px */
+  font-weight: 700; /* bold */
+  color: #ffffff;
+  pointer-events: none; /* allow clicks to pass through */
+}
+
+/* Logout button */
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  background-color: #dc2626;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.logout-button:hover {
+  background-color: #b91c1c;
+}
+
+.logout-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #ef4444;
+}
+
+/* Logout icon inside the button */
+.logout-icon {
+  width: 1.25rem; /* 20px */
+  height: 1.25rem;
+}
