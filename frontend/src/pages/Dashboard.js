@@ -349,6 +349,7 @@ export default function Dashboard() {
                                     {selectedProject.ProjectName || "Selected Project"} - Tasks
                                 </h3>
                                 <p><strong>Description:</strong> {selectedProject.Description || "No description available"}</p>
+                                <p><strong>Owner:</strong> {selectedProject.OwnerUsername || 'N/A'}</p>
                                 <p><strong>Start Date:</strong> {selectedProject.StartDate ? new Date(selectedProject.StartDate).toLocaleDateString() : "N/A"}</p>
                                 <p><strong>End Date:</strong> {selectedProject.EndDate ? new Date(selectedProject.EndDate).toLocaleDateString() : "N/A"}</p>
                                 {canCreateTasks && (
