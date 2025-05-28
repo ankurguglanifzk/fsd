@@ -314,7 +314,7 @@ export default function Dashboard() {
                 <div className="sidebar">
                     {user && (
                         <div className="welcome-message-container">
-                            <p className="welcome-text">Welcome, <span className="username-text">{user.Username}</span>!</p>
+                            <p className="welcome-text">Welcome, <span className="username-text">{user.Username}</span></p>
                             <p className="role-text">Roles: {Array.isArray(user.roles) ? user.roles.join(", ") : "N/A"}</p>
                         </div>
                     )}

@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem; /* 12px */
-  background-color: #2d3748; /* gray-800 */
+  background-color: #fb8e20; /* gray-800 */
   color: #ffffff;
   position: relative;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -40,7 +40,7 @@
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
-  background-color: #dc2626;
+  background-color: grey;
   color: #ffffff;
   font-weight: 600;
   font-size: 0.875rem;
@@ -50,7 +50,8 @@
 }
 
 .logout-button:hover {
-  background-color: #b91c1c;
+  background-color: #615654
+  ;
 }
 
 .logout-button:focus {

@@ -75,8 +75,8 @@ export function LoginPage() {
       <main className="login-content-wrapper">
         <div className="login-card">
           <div className="login-header">
-            <h1 className="login-title">Task Tracker</h1>
-            <p className="login-subtitle">Welcome! Please sign in.</p>
+            <h1 className="login-title">Welcome! Please sign in</h1>
+            <p className="login-subtitle"></p>
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
