@@ -1,25 +1,99 @@
 {
-  "client": "thunder-client",
-  "collectionName": "Task Tracker User APIs (Simple)",
   "requests": [
     {
-      "name": "1. Admin Login",
+      "name": "User Login",
       "method": "POST",
       "url": "http://localhost:5000/api/v1/users/login",
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
       "body": {
         "type": "json",
-        "raw": {
-          "Username": "YOUR_ADMIN_USERNAME",
-          "Password": "YOUR_ADMIN_PASSWORD"
+        "json": {
+          "Username": "johndoe",
+          "Password": "secretpassword"
         }
       }
     },
     {
-      "name": "2. Get Current User (Me)",
+      "name": "Google Login Redirect",
+      "method": "GET",
+      "url": "http://localhost:5000/api/v1/users/login/google",
+      "headers": []
+    },
+    {
+      "name": "User Logout",
+      "method": "POST",
+      "url": "http://localhost:5000/api/v1/users/logout",
+      "headers": []
+    },
+    {
+      "name": "Get Current User Info",
       "method": "GET",
       "url": "http://localhost:5000/api/v1/users/me",
       "headers": []
+    },
+    {
+      "name": "Create User",
+      "method": "POST",
+      "url": "http://localhost:5000/api/v1/users/",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer <admin_token>" }
+      ],
+      "body": {
+        "type": "json",
+        "json": {
+          "Username": "janedoe",
+          "Password": "strongpassword",
+          "Email": "jane.doe@tigeranalytics.com",
+          "FullName": "Jane Doe",
+          "roles": ["admin", "read_only_user"]
+        }
+      }
+    },
+    {
+      "name": "List All Users",
+      "method": "GET",
+      "url": "http://localhost:5000/api/v1/users/",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer <admin_token>" }
+      ]
+    },
+    {
+      "name": "Get User by ID",
+      "method": "GET",
+      "url": "http://localhost:5000/api/v1/users/3",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer <admin_token>" }
+      ]
+    },
+    {
+      "name": "Update User",
+      "method": "PUT",
+      "url": "http://localhost:5000/api/v1/users/3",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer <admin_token>" }
+      ],
+      "body": {
+        "type": "json",
+        "json": {
+          "FullName": "Jane D. Updated",
+          "Email": "jane.updated@tigeranalytics.com",
+          "Password": "newstrongpassword",
+          "IsActive": true,
+          "roles": ["admin"]
+        }
+      }
+    },
+    {
+      "name": "Delete User",
+      "method": "DELETE",
+      "url": "http://localhost:5000/api/v1/users/3",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer <admin_token>" }
+      ]
     },
     {
       "name": "List All System Roles",
@@ -28,115 +102,27 @@
       "headers": []
     },
     {
-      "name": "Create User (Success)",
+      "name": "Assign Role to User",
       "method": "POST",
-      "url": "http://localhost:5000/api/v1/users/",
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "url": "http://localhost:5000/api/v1/users/3/roles",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer <admin_token>" }
+      ],
       "body": {
         "type": "json",
-        "raw": {
-          "Username": "new_creator",
-          "Password": "password123",
-          "Email": "creator@example.com",
-          "FullName": "Task Creator",
-          "roles": ["task_creator"]
-        }
-      }
-    },
-    {
-      "name": "Create User (FAIL - Invalid Role)",
-      "method": "POST",
-      "url": "http://localhost:5000/api/v1/users/",
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "body": {
-        "type": "json",
-        "raw": {
-          "Username": "bad_role_user",
-          "Password": "password123",
-          "Email": "badrole@example.com",
-          "FullName": "Bad Role User",
-          "roles": ["non_existent_role"]
-        }
-      }
-    },
-    {
-      "name": "List All Users",
-      "method": "GET",
-      "url": "http://localhost:5000/api/v1/users/",
-      "headers": []
-    },
-    {
-      "name": "Get User by ID (Edit ID!)",
-      "method": "GET",
-      "url": "http://localhost:5000/api/v1/users/1",
-      "headers": []
-    },
-    {
-      "name": "Update User (Success - Edit ID!)",
-      "method": "PUT",
-      "url": "http://localhost:5000/api/v1/users/1",
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "body": {
-        "type": "json",
-        "raw": {
-          "FullName": "Updated Full Name",
-          "roles": ["task_creator"]
-        }
-      }
-    },
-    {
-      "name": "Update User (FAIL - Invalid Role - Edit ID!)",
-      "method": "PUT",
-      "url": "http://localhost:5000/api/v1/users/1",
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "body": {
-        "type": "json",
-        "raw": {
-          "roles": ["another_bad_role"]
-        }
-      }
-    },
-    {
-      "name": "Assign Role (Success - Edit ID!)",
-      "method": "POST",
-      "url": "http://localhost:5000/api/v1/users/1/roles",
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "body": {
-        "type": "json",
-        "raw": {
+        "json": {
           "RoleName": "admin"
         }
       }
     },
     {
-      "name": "Assign Role (FAIL - Invalid Role - Edit ID!)",
-      "method": "POST",
-      "url": "http://localhost:5000/api/v1/users/1/roles",
-      "headers": [{ "name": "Content-Type", "value": "application/json" }],
-      "body": {
-        "type": "json",
-        "raw": {
-          "RoleName": "super_user_does_not_exist"
-        }
-      }
-    },
-    {
-      "name": "Remove Role (Edit IDs!)",
+      "name": "Remove Role from User",
       "method": "DELETE",
-      "url": "http://localhost:5000/api/v1/users/1/roles/2",
-      "headers": []
-    },
-    {
-      "name": "Delete User (Edit ID!)",
-      "method": "DELETE",
-      "url": "http://localhost:5000/api/v1/users/3",
-      "headers": []
-    },
-    {
-      "name": "Logout User",
-      "method": "POST",
-      "url": "http://localhost:5000/api/v1/users/logout",
-      "headers": []
+      "url": "http://localhost:5000/api/v1/users/3/roles/2",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer <admin_token>" }
+      ]
     }
   ]
 }

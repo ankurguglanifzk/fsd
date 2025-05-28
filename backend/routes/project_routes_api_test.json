@@ -1,59 +1,54 @@
 {
-    "client": "Thunder Client",
-    "collectionName": "Project API",
-    "dateExported": "2025-05-21T12:00:00.000Z",
-    "requests": [
-      {
-        "name": "Create Project",
-        "method": "POST",
-        "url": "http://localhost:5000/api/v1/projects/",
-        "headers": [
-          { "name": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "type": "json",
-          "json": {
-            "ProjectName": "Test Project",
-            "Description": "A new test project",
-            "StartDate": "2025-05-21",
-            "EndDate": "2025-06-30",
-            "OwnerUserID": 1
-          }
+  "requests": [
+    {
+      "name": "Create Project",
+      "method": "POST",
+      "url": "http://localhost:5000/api/v1/projects/",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "type": "json",
+        "json": {
+          "ProjectName": "Test Project",
+          "Description": "A new test project",
+          "StartDate": "2025-05-21",
+          "EndDate": "2025-06-30",
+          "OwnerUserID": 1
         }
-      },
-      {
-        "name": "List Projects",
-        "method": "GET",
-        "url": "http://localhost:5000/projects/"
-      },
-      {
-        "name": "Get Project by ID",
-        "method": "GET",
-        "url": "http://localhost:5000/projects/1"
-      },
-      {
-        "name": "Update Project",
-        "method": "PUT",
-        "url": "http://localhost:5000/projects/1",
-        "headers": [
-          { "name": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "type": "json",
-          "json": {
-            "ProjectName": "Updated Project Name",
-            "Description": "Updated description",
-            "StartDate": "2025-05-25",
-            "EndDate": "2025-07-10",
-            "OwnerUserID": 1
-          }
-        }
-      },
-      {
-        "name": "Delete Project",
-        "method": "DELETE",
-        "url": "http://localhost:5000/projects/1"
       }
-    ]
-  }
-  
+    },
+    {
+      "name": "List Projects",
+      "method": "GET",
+      "url": "http://localhost:5000/api/v1/projects/",
+      "headers": [
+        { "name": "Accept", "value": "application/json" }
+      ]
+    },
+    {
+      "name": "Update Project",
+      "method": "PUT",
+      "url": "http://localhost:5000/api/v1/projects/1",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "type": "json",
+        "json": {
+          "Description": "Updated project description",
+          "StartDate": "2025-05-25",
+          "EndDate": "2025-07-01"
+        }
+      }
+    },
+    {
+      "name": "Delete Project",
+      "method": "DELETE",
+      "url": "http://localhost:5000/api/v1/projects/1",
+      "headers": [
+        { "name": "Accept", "value": "application/json" }
+      ]
+    }
+  ]
+}

@@ -1,91 +1,54 @@
 {
-    "client": "Thunder Client",
-    "collectionName": "Task API",
-    "requests": [
-      {
-        "name": "Create Task",
-        "method": "POST",
-        "url": "http://localhost:5000/api/v1/tasks/",
-        "headers": [
-          {
-            "name": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "type": "json",
-          "raw": {
-            "Description": "Write API documentation",
-            "DueDate": "2025-05-25",
-            "Status": "new",
-            "ProjectID": 1,
-            "OwnerUserID": 2,
-            "AssignedToUserID": 3
-          }
+  "requests": [
+    {
+      "name": "Create Task",
+      "method": "POST",
+      "url": "http://localhost:5000/task_routes/",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "type": "json",
+        "json": {
+          "Description": "Finish writing unit tests",
+          "ProjectID": 1,
+          "Status": "new",
+          "DueDate": "2025-06-15",
+          "AssignedToUserID": 3
         }
-      },
-      {
-        "name": "Get All Tasks",
-        "method": "GET",
-        "url": "http://localhost:5000/api/v1/tasks/"
-      },
-      {
-        "name": "Get Task by ID",
-        "method": "GET",
-        "url": "http://localhost:5000/api/v1/tasks/1"
-      },
-      {
-        "name": "Update Task",
-        "method": "PUT",
-        "url": "http://localhost:5000/api/v1/tasks/1",
-        "headers": [
-          {
-            "name": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "type": "json",
-          "raw": {
-            "Description": "Update task description",
-            "Status": "in-progress",
-            "DueDate": "2025-05-28"
-          }
-        }
-      },
-      {
-        "name": "Delete Task",
-        "method": "DELETE",
-        "url": "http://localhost:5000/api/v1/tasks/1"
-      },
-      {
-        "name": "Assign Task to User",
-        "method": "POST",
-        "url": "http://localhost:5000/api/v1/tasks/assign",
-        "headers": [
-          {
-            "name": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "type": "json",
-          "raw": {
-            "task_id": 1,
-            "user_id": 3
-          }
-        }
-      },
-      {
-        "name": "Mark Task as Complete",
-        "method": "POST",
-        "url": "http://localhost:5000/api/v1/tasks/1/complete"
-      },
-      {
-        "name": "Get My Assigned Tasks",
-        "method": "GET",
-        "url": "http://localhost:5000/api/v1/tasks/my"
       }
-    ]
-  }
-  
+    },
+    {
+      "name": "Get Task by ID",
+      "method": "GET",
+      "url": "http://localhost:5000/task_routes/1",
+      "headers": [
+        { "name": "Accept", "value": "application/json" }
+      ]
+    },
+    {
+      "name": "Update Task",
+      "method": "PUT",
+      "url": "http://localhost:5000/task_routes/1",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "type": "json",
+        "json": {
+          "Status": "in-progress",
+          "AssignedToUserID": 5,
+          "DueDate": "2025-07-01"
+        }
+      }
+    },
+    {
+      "name": "Delete Task",
+      "method": "DELETE",
+      "url": "http://localhost:5000/task_routes/1",
+      "headers": [
+        { "name": "Accept", "value": "application/json" }
+      ]
+    }
+  ]
+}
