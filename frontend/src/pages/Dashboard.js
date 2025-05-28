@@ -372,7 +372,11 @@ export default function Dashboard() {
                             
                         </>
                     ) : (
-                        !loading && <p className="info-message">Select a project to see its tasks or create a new one.</p>
+                        !loading && <div className="info-container">
+                        <img src="./project.png" alt="No project selected" className="info-image" />
+                        <p className="info-message">Select a project to see its tasks or create a new one.</p>
+                      </div>
+                  
                     )}
                     {loading && !selectedProject && <p className="info-message">Loading projects...</p>}
                 </div>
