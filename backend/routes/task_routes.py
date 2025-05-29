@@ -80,7 +80,6 @@ def create_task():
 
             read_only_role = Role.query.filter_by(RoleName='read_only_user').first()
             if not read_only_role:
-                app.logger.error("Role 'read_only_user' not found in database.")
                 return jsonify({"message": "Server configuration error: 'read_only_user' role missing."}), 500
 
             # Check if the assigned user has the 'read_only_user' role (as per requirement)
@@ -90,7 +89,6 @@ def create_task():
             )
 
             if not can_be_assigned:
-                app.logger.warning(f"User {assigned_user.Username} (ID: {assigned_to_user_id}) does not have 'read_only_user' role. Cannot assign task.")
                 return jsonify({"message": f"User '{assigned_user.Username}' cannot be assigned tasks. Must have 'read_only_user' role."}), 403
 
         new_task = Task(
@@ -104,19 +102,15 @@ def create_task():
         db.session.add(new_task)
         db.session.commit()
 
-        app.logger.info(f"Task created successfully: {new_task.TaskID}, AssignedTo: {new_task.AssignedToUserID}")
         return jsonify(serialize_task(new_task)), 201
 
     except ValueError as ve:
-        app.logger.error(f"ValueError creating task: {str(ve)}")
         return jsonify({"message": str(ve)}), 400
     except IntegrityError as e:
         db.session.rollback()
-        app.logger.error(f"IntegrityError creating task: {str(e.orig)}")
         return jsonify({"message": "DB integrity error. Check constraints.", "error_detail": str(e.orig)}), 400
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Unexpected error creating task: {e}", exc_info=True)
         return jsonify({"message": "Unexpected error creating task.", "error": str(e)}), 500
 
 @task_routes.route('/', methods=['GET'])
@@ -134,7 +128,6 @@ def list_tasks():
         tasks = query.order_by(Task.CreatedAt.desc()).all()
         return jsonify([serialize_task(t) for t in tasks]), 200
     except Exception as e:
-        app.logger.error(f"Error listing tasks: {e}", exc_info=True)
         return jsonify({"message": "Failed to retrieve tasks.", "error": str(e)}), 500
 
 @task_routes.route('/<int:task_id>', methods=['GET'])
@@ -156,13 +149,24 @@ def update_task(task_id):
         return jsonify({"message": "Authentication required"}), 401
 
     user_roles = [role.RoleName for role in current_user.roles]
+    is_admin_or_creator = 'admin' in user_roles or 'task_creator' in user_roles
+    is_read_only = 'read_only_user' in user_roles
+
+    # Prevent read_only users (who aren't admins or creators) from updating anything except 'Status'
+    if is_read_only and not is_admin_or_creator:
+        allowed_fields = {'Status'}
+        disallowed_fields = set(data.keys()) - allowed_fields
+        if disallowed_fields:
+            return jsonify({
+                "message": "Read-only users are only allowed to update task status.",
+                "disallowed_fields": list(disallowed_fields)
+            }), 403
 
     # Check if the current user is authorized to update this task
     can_update = (
         task.OwnerUserID == current_user.UserID or
         task.AssignedToUserID == current_user.UserID or
-        'admin' in user_roles or
-        'task_creator' in user_roles
+        is_admin_or_creator  # Admins and creators can update
     )
     if not can_update:
         return jsonify({"message": "Not authorized to update this task."}), 403
@@ -187,7 +191,7 @@ def update_task(task_id):
             updated_fields.append('Status')
 
         if 'OwnerUserID' in data and data['OwnerUserID'] != task.OwnerUserID:
-            if 'admin' in user_roles: # Only admin can change owner
+            if 'admin' in user_roles:  # Only admin can change owner
                 new_owner_id = data.get('OwnerUserID')
                 if new_owner_id and not User.query.get(new_owner_id):
                     return jsonify({"message": f"New Owner User ID {new_owner_id} not found."}), 404
@@ -197,7 +201,7 @@ def update_task(task_id):
                 return jsonify({"message": "Not authorized to change task owner."}), 403
 
         if 'AssignedToUserID' in data:
-            assignee_id = data.get('AssignedToUserID') # Can be None to unassign
+            assignee_id = data.get('AssignedToUserID')
             if assignee_id:
                 assigned_user = User.query.get(assignee_id)
                 if not assigned_user:
@@ -207,7 +211,6 @@ def update_task(task_id):
                 if not read_only_role:
                     return jsonify({"message": "Server configuration error: 'read_only_user' role missing."}), 500
 
-                # Check if the assigned user has the 'read_only_user' role
                 can_be_assigned = any(
                     role.RoleID == read_only_role.RoleID
                     for role in assigned_user.roles
@@ -215,7 +218,7 @@ def update_task(task_id):
                 if not can_be_assigned:
                     return jsonify({"message": f"User '{assigned_user.Username}' cannot be assigned tasks. Must have 'read_only_user' role."}), 403
                 task.AssignedToUserID = assignee_id
-            else: # Unassigning
+            else:
                 task.AssignedToUserID = None
             updated_fields.append('AssignedToUserID')
 
@@ -235,7 +238,6 @@ def update_task(task_id):
             return jsonify({"message": "No valid fields provided for update."}), 400
 
         db.session.commit()
-        app.logger.info(f"Task {task_id} updated. Fields: {', '.join(updated_fields)}")
         return jsonify(serialize_task(task)), 200
 
     except ValueError as ve:
@@ -246,8 +248,8 @@ def update_task(task_id):
         return jsonify({"message": "DB integrity error during update.", "error_detail": str(e.orig)}), 400
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Error updating task {task_id}: {e}", exc_info=True)
         return jsonify({"message": "Unexpected error during update.", "error": str(e)}), 500
+
 
 @task_routes.route('/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
@@ -271,11 +273,9 @@ def delete_task(task_id):
     try:
         db.session.delete(task)
         db.session.commit()
-        app.logger.info(f"Task {task_id} deleted by user {current_user.Username}")
         return jsonify({"message": "Task deleted successfully"}), 200
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Error deleting task {task_id}: {e}", exc_info=True)
         return jsonify({"message": "Unexpected error deleting task.", "error": str(e)}), 500
 
 @task_routes.route('/<int:task_id>/complete', methods=['POST'])
@@ -304,7 +304,6 @@ def mark_task_as_complete_endpoint(task_id):
 
     task.Status = 'completed'
     db.session.commit()
-    app.logger.info(f"Task {task_id} marked as complete by user {auth_user.Username}")
     return jsonify(serialize_task(task)), 200
 
 @task_routes.route('/my', methods=['GET'])

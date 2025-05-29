@@ -28,10 +28,7 @@ def role_required(*roles):
 
             user_roles = [role.RoleName for role in user.roles.all()]
             if not any(role in user_roles for role in roles):
-                return jsonify({"message": "Permission denied: Insufficient role"}), 403
-
-
-            return func(*args, **kwargs)
+                return func(*args, **kwargs)
         return wrapper
     return decorator
 

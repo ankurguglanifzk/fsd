@@ -3,7 +3,7 @@
     {
       "name": "Create Task",
       "method": "POST",
-      "url": "http://localhost:5000/task_routes/",
+      "url": "http://localhost:5000/api/v1/tasks",
       "headers": [
         { "name": "Content-Type", "value": "application/json" }
       ],
@@ -21,7 +21,7 @@
     {
       "name": "Get Task by ID",
       "method": "GET",
-      "url": "http://localhost:5000/task_routes/1",
+      "url": "http://localhost:5000/api/v1/task/24",
       "headers": [
         { "name": "Accept", "value": "application/json" }
       ]
@@ -29,7 +29,7 @@
     {
       "name": "Update Task",
       "method": "PUT",
-      "url": "http://localhost:5000/task_routes/1",
+      "url": "http://localhost:5000/api/v1/task/24",
       "headers": [
         { "name": "Content-Type", "value": "application/json" }
       ],
@@ -37,7 +37,7 @@
         "type": "json",
         "json": {
           "Status": "in-progress",
-          "AssignedToUserID": 5,
+          "AssignedToUserID": 3,
           "DueDate": "2025-07-01"
         }
       }
@@ -45,7 +45,7 @@
     {
       "name": "Delete Task",
       "method": "DELETE",
-      "url": "http://localhost:5000/task_routes/1",
+      "url": "http://localhost:5000/api/v1/task/1",
       "headers": [
         { "name": "Accept", "value": "application/json" }
       ]

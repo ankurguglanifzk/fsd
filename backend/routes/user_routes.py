@@ -18,7 +18,6 @@ def get_all_role_names():
         roles = Role.query.all()
         return {role.RoleName for role in roles}
     except Exception as e:
-        app.logger.error(f"Failed to fetch roles from database: {e}")
         return set() # Return an empty set on error, handled in routes
 
 # --- Authentication ---
@@ -57,8 +56,6 @@ def login():
 @user_routes.route('/login/google')
 def login_google():
     redirect_uri = url_for('user_routes.google_callback', _external=True)
-    app.logger.info(f"Google login redirect URI: {redirect_uri}")
-    app.logger.info(f"Session before redirect: {dict(session)}")
     return oauth.google.authorize_redirect(redirect_uri)
 
 def get_predefined_role(role_name):
@@ -66,19 +63,15 @@ def get_predefined_role(role_name):
     try:
         role = Role.query.filter_by(RoleName=role_name).first()
         if not role:
-            app.logger.error(f"Predefined role '{role_name}' not found in DB.")
-        return role
+            return role
     except Exception as e:
-        app.logger.error(f"Error fetching predefined role '{role_name}': {e}")
         return None
 
 
 
 @user_routes.route('/google/callback')  # Path: /api/v1/users/google/callback
 def google_callback():
-    app.logger.info(f"Session at callback: {dict(session)}")
     print("🔄 Google callback route hit.")
-    app.logger.info("🔄 Google callback route hit.")
     try:
         token = oauth.google.authorize_access_token()
         print(token)
@@ -87,7 +80,6 @@ def google_callback():
         user_info = user_info_response.json()
         print(user_info)
     except Exception as e:
-        app.logger.error(f"Google OAuth callback error: {e}")
         return redirect(f"http://localhost:3000/login?error=google_auth_failed&message={str(e)}")
 
     if not user_info or 'email' not in user_info:
@@ -98,7 +90,6 @@ def google_callback():
 
     # ✅ Restrict to tigeranalytics.com domain
     if domain.lower() != "tigeranalytics.com":
-        app.logger.warning(f"Unauthorized domain attempted login: {email}")
         return redirect("http://localhost:3000/login?error=unauthorized_domain")
 
     full_name = user_info.get('name')
@@ -107,7 +98,6 @@ def google_callback():
     user = User.query.filter_by(Email=email).first()
 
     if not user:
-        app.logger.info(f"New user via Google SSO: {email}. Creating account.")
         default_role = get_predefined_role('read_only_user')
         if not default_role:
             return redirect("http://localhost:3000/login?error=default_role_missing")
@@ -131,18 +121,14 @@ def google_callback():
             user_role = UserRole(UserID=user.UserID, RoleID=default_role.RoleID)
             db.session.add(user_role)
             db.session.commit()
-            app.logger.info(f"User {user.Username} created with role {default_role.RoleName}")
         except IntegrityError as e:
             db.session.rollback()
-            app.logger.error(f"Error creating Google SSO user (IntegrityError): {e}")
             return redirect("http://localhost:3000/login?error=user_creation_failed")
         except Exception as e:
             db.session.rollback()
-            app.logger.error(f"Error creating Google SSO user: {e}")
             return redirect("http://localhost:3000/login?error=user_creation_failed")
 
     if not user.IsActive:
-        app.logger.warning(f"Inactive user tried to login via Google: {user.Username}")
         return redirect("http://localhost:3000/login?error=inactive_user")
 
     # ✅ Log the user in
@@ -151,7 +137,6 @@ def google_callback():
     session['username'] = user.Username
     session['roles'] = [role.RoleName for role in user.roles.all()]
 
-    app.logger.info(f"User {user.Username} logged in successfully via Google.")
     return redirect("http://localhost:3000/dashboard")
 
 @user_routes.route('/logout', methods=['POST']) # Path: /api/v1/users/logout
@@ -239,7 +224,6 @@ def create_user():
         return jsonify({"message": "Database integrity error.", "error_detail": str(e.orig)}), 400
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Error creating user: {e}")
         return jsonify({"message": "An unexpected error occurred.", "error": str(e)}), 500
 
 @user_routes.route('/', methods=['GET'])
@@ -257,7 +241,6 @@ def list_users():
             })
         return jsonify(users_data), 200
     except Exception as e:
-        app.logger.error(f"Error listing users: {e}")
         return jsonify({"message": "Failed to retrieve users.", "error": str(e)}), 500
 
 @user_routes.route('/<int:user_id>', methods=['GET'])
@@ -334,7 +317,6 @@ def update_user(user_id):
         return jsonify({"message": "Database integrity error.", "error_detail": str(e.orig)}), 400
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Error updating user {user_id}: {e}")
         return jsonify({"message": "Unexpected error.", "error": str(e)}), 500
 
 @user_routes.route('/<int:user_id>', methods=['DELETE'])
@@ -347,7 +329,6 @@ def delete_user(user_id):
         return jsonify({"message": "User deleted"}), 200
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Error deleting user {user_id}: {e}")
         return jsonify({"message": "Unexpected error.", "error": str(e)}), 500
 
 @user_routes.route('/roles', methods=['GET'])
@@ -356,7 +337,6 @@ def list_all_system_roles():
         roles = Role.query.all()
         return jsonify([{"RoleID": r.RoleID, "RoleName": r.RoleName, "Description": r.Description} for r in roles]), 200
     except Exception as e:
-        app.logger.error(f"Error listing roles: {e}")
         return jsonify({"message": "Failed to retrieve roles.", "error": str(e)}), 500
 
 @user_routes.route('/<int:user_id>/roles', methods=['POST'])
@@ -393,7 +373,6 @@ def assign_role_to_user(user_id):
         return jsonify({"message": f"Role '{role.RoleName}' assigned to user '{user.Username}'."}), 201
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Error assigning role to user {user_id}: {e}")
         return jsonify({"message": "Failed to assign role.", "error": str(e)}), 500
 
 @user_routes.route('/<int:user_id>/roles/<int:role_id_to_remove>', methods=['DELETE'])
@@ -410,5 +389,4 @@ def remove_role_from_user(user_id, role_id_to_remove):
         return jsonify({"message": f"Role '{role.RoleName}' removed from user '{user.Username}'."}), 200
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Error removing role from user {user_id}: {e}")
         return jsonify({"message": "Failed to remove role.", "error": str(e)}), 500
