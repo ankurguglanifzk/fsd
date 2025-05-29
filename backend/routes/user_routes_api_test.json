@@ -10,16 +10,10 @@
       "body": {
         "type": "json",
         "json": {
-          "Username": "johndoe",
-          "Password": "secretpassword"
+          "Username": "readonlyuser",
+          "Password": "ReadOnly@123"
         }
       }
-    },
-    {
-      "name": "Google Login Redirect",
-      "method": "GET",
-      "url": "http://localhost:5000/api/v1/users/login/google",
-      "headers": []
     },
     {
       "name": "User Logout",
@@ -48,7 +42,7 @@
           "Password": "strongpassword",
           "Email": "jane.doe@tigeranalytics.com",
           "FullName": "Jane Doe",
-          "roles": ["admin", "read_only_user"]
+          "roles": [ "read_only_user"]
         }
       }
     },

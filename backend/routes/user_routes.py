@@ -2,23 +2,22 @@
 
 from flask import Blueprint, request, jsonify,redirect, url_for,session, current_app as app
 from models import db, User, Role, UserRole 
-from werkzeug.security import generate_password_hash # check_password_hash is in User model
+from werkzeug.security import generate_password_hash 
 from sqlalchemy.exc import IntegrityError
-from utils import role_required, get_current_user_from_session # Use helper from utils.py
+from utils import role_required, get_current_user_from_session 
 from auth import oauth
 import os
 
-# Ensure this blueprint name 'user_routes' matches the import in app.py
+
 user_routes = Blueprint('user_routes', __name__)
 
-# --- Helper Function to get roles from DB ---
 def get_all_role_names():
     """Fetches all role names from the database."""
     try:
         roles = Role.query.all()
         return {role.RoleName for role in roles}
     except Exception as e:
-        return set() # Return an empty set on error, handled in routes
+        return set() 
 
 # --- Authentication ---
 @user_routes.route('/login', methods=['POST']) # Full path will be /api/v1/users/login

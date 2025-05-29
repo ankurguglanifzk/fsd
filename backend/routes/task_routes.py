@@ -13,7 +13,6 @@ def parse_date_string_to_date_obj(date_string, field_name="date"):
     if not date_string:
         return None
     try:
-        # Ensure the input string is parsed correctly if it includes time
         return datetime.strptime(date_string.split('T')[0], '%Y-%m-%d').date()
     except ValueError:
         raise ValueError(f"Invalid date format for {field_name}. Use YYYY-MM-DD.")
@@ -310,10 +309,11 @@ def mark_task_as_complete_endpoint(task_id):
 def get_my_assigned_tasks_endpoint():
     """Retrieves tasks assigned to the current user."""
     auth_user = get_current_user_from_session()
+    print(auth_user)
     if not auth_user:
         return jsonify({'message': 'Authentication required'}), 401
 
-    tasks = Task.query.filter_by(AssignedToUserID=auth_user.UserID).order_by(Task.DueDate.asc().nullslast(), Task.CreatedAt.desc()).all()
+    tasks = Task.query.filter_by(AssignedToUserID=auth_user.UserID).order_by(Task.DueDate.asc(), Task.CreatedAt.desc()).all()
     return jsonify([serialize_task(t) for t in tasks]), 200
 
 @task_routes.route('/owned', methods=['GET'])

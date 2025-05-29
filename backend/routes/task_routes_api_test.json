@@ -21,7 +21,7 @@
     {
       "name": "Get Task by ID",
       "method": "GET",
-      "url": "http://localhost:5000/api/v1/task/24",
+      "url": "http://localhost:5000/api/v1/tasks/24",
       "headers": [
         { "name": "Accept", "value": "application/json" }
       ]
@@ -29,7 +29,7 @@
     {
       "name": "Update Task",
       "method": "PUT",
-      "url": "http://localhost:5000/api/v1/task/24",
+      "url": "http://localhost:5000/api/v1/tasks/24",
       "headers": [
         { "name": "Content-Type", "value": "application/json" }
       ],
@@ -45,7 +45,7 @@
     {
       "name": "Delete Task",
       "method": "DELETE",
-      "url": "http://localhost:5000/api/v1/task/1",
+      "url": "http://localhost:5000/api/v1/tasks/1",
       "headers": [
         { "name": "Accept", "value": "application/json" }
       ]
