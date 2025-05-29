@@ -93,7 +93,7 @@ export default function Dashboard() {
             const data = await apiFetch(`${API_BASE_USERS}/`);
             setAllUsers(data);
         } catch (err) {
-            setError(`Workspace Users: ${err.message}`);
+            
             setAllUsers([]);
         }
     }, []);
