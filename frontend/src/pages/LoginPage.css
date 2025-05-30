@@ -1,277 +1,314 @@
-/* src/pages/LoginPage.css */
-.login-page-container {
-    min-height: 100vh;
-    background-color: #546161; /* bg-slate-900 */
-    display: flex;
-    flex-direction: column;
-    /* items-center is removed to allow Header to be full width */
-    /* justify-content: center; /* This will be handled by the main content wrapper */
-    padding: 0; /* Remove padding if header is full width */
-    font-family: sans-serif; /* font-sans */
-  }
-  
-  .login-page-container ::selection {
-    background-color: black; /* sky-700 */
-    color: #ffffff;
-  }
-  
-  /* Wrapper for the content below the header, to center it */
-  .login-content-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-grow: 1; /* Takes remaining space after header */
-    padding: 1rem; /* Re-apply padding here */
-    width: 100%;
-  }
-  
-  
-  .login-card {
-    width: 100%;
-    max-width: 28rem; /* max-w-md */
-    background-color: #151818; /* bg-slate-800 */
-    padding: 2rem 2.5rem; /* p-8 md:p-10 (using a mid-value) */
-    border-radius: 0.75rem; /* rounded-xl */
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-2xl */
-    border: 1px solid #334155; /* border-slate-700 */
-  }
-  
-  .login-header {
-    text-align: center;
-    margin-bottom: 2rem; /* mb-8 */
-  }
-  
-  /* .login-logo class can be removed if logo is only in Header.js */
-  
-  .login-title {
-    font-size: 1.875rem; /* text-3xl */
-    font-weight: 700; /* font-bold */
-    color: #0ea5e9; /* text-sky-500 */
-  }
-  
-  .login-subtitle {
-    color: #94a3b8; /* text-slate-400 */
-    margin-top: 0.5rem; /* mt-2 */
-  }
-  
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* space-y-6 */
-  }
-  
-  .form-group {
-    /* Container for label + input if needed, or apply styles directly */
-  }
-  
-  .form-label {
-    display: block;
-    font-size: 0.875rem; /* text-sm */
-    font-weight: 500; /* font-medium */
-    color: #cbd5e1; /* text-slate-300 */
-    margin-bottom: 0.25rem; /* mb-1 */
-    text-align: center; /* Centering the label text */
-  }
-  
-  .form-input {
-    
-    margin-top: 0.25rem; /* mt-1 */
-    display: block;
-    width: 420px;
-    padding: 0.75rem 1rem; /* px-4 py-3 */
-    background-color: #334155; /* bg-slate-700 */
-    border: 1px solid #475569; /* border-slate-600 */
-    border-radius: 0.5rem; /* rounded-lg */
-    color: #f1f5f9; /* text-slate-100 */
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  }
-  
-  .form-input::placeholder {
-    
-    color: #64748b; /* placeholder-slate-500 */
-  }
-  
-  .form-input:focus {
-    outline: none;
-    border-color: #0ea5e9; /* focus:border-sky-500 */
-    box-shadow: 0 0 0 2px #0ea5e9; /* focus:ring-2 focus:ring-sky-500 */
-  }
-  
-  .password-input-container {
-    position: relative;
-    width: 410px;
-  }
-  
-  .password-toggle-button {
-    
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    padding-right: 0.75rem; /* pr-3 */
-    display: flex;
-    align-items: center;
-    font-size: 0.875rem; /* text-sm */
-    line-height: 1.25rem; /* leading-5 */
-    color: #94a3b8; /* text-slate-400 */
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: color 0.15s ease-in-out;
-  }
-  
-  .password-toggle-button:hover {
-    color: #38bdf8; /* hover:text-sky-400 */
-  }
-  
-  /* Remember Me Section Styles */
-  .remember-me-container {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Center the checkbox and label */
-    margin-top: 0.5rem; /* Add some space above */
-    margin-bottom: 0.5rem; /* Add some space below */
-  }
-  
-  .remember-me-checkbox {
-    height: 1rem; /* h-4 */
-    width: 1rem; /* w-4 */
-    border-radius: 0.25rem; /* rounded */
-    border: 1px solid #475569; /* border-slate-600 */
-    background-color: #334155; /* bg-slate-700 */
-    color: #0ea5e9; /* text-sky-500 - for the checkmark color */
-    margin-right: 0.5rem; /* mr-2 */
-    cursor: pointer;
-    /* Removes default appearance for better custom styling if needed */
-    /* -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none; */
-    /* Basic focus style */
-  }
-  .remember-me-checkbox:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px #0ea5e9; /* focus:ring-sky-500 */
-  }
-  /* Style for when checkbox is checked (using accent-color for simplicity) */
-  .remember-me-checkbox {
-      accent-color: #0ea5e9; /* sky-500 */
-  }
-  
-  
-  .remember-me-label {
-    font-size: 0.875rem; /* text-sm */
-    color: #cbd5e1; /* text-slate-300 */
-    cursor: pointer;
-  }
-  
-  
-  .error-message-container {
-    background-color: rgba(239, 68, 68, 0.1); /* bg-red-500/10 */
-    border: 1px solid rgba(239, 68, 68, 0.3); /* border-red-500/30 */
-    color: #fca5a5; /* text-red-300 */
-    padding: 0.75rem 1rem; /* px-4 py-3 */
-    border-radius: 0.5rem; /* rounded-lg */
-    display: flex;
-    align-items: center;
-    font-size: 0.875rem; /* text-sm */
-  }
-  
-  .error-icon {
-    margin-right: 0.5rem; /* mr-2 */
-    color: #f87171; /* text-red-400 */
-    flex-shrink: 0;
-  }
-  
-  .submit-button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1rem; /* px-4 py-3 */
-    border: 1px solid transparent;
-    font-size: 1rem; /* text-base */
-    font-weight: 500; /* font-medium */
-    border-radius: 0.5rem; /* rounded-lg */
-    color: #0f172a; /* text-slate-900 */
-    background-color: #0ea5e9; /* bg-sky-500 */
-    transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
-    cursor: pointer;
-  }
-  
-  .submit-button:hover {
-    background-color: #0284c7; /* hover:bg-sky-600 */
-  }
-  
-  .submit-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px #0ea5e9; /* focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 */
-  }
-  
-  .submit-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
-  .loading-icon {
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
-  .login-footer {
-    text-align: center;
-    font-size: 0.75rem; /* text-xs */
-    color: #475569; /* text-slate-600 */
-   
-    margin-top: 2.5rem; /* mt-10 */
-  }
+/* LoginPage.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-  .oauth-divider {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0;
-    font-weight: 500;
-    color: #888;
-  }
-  
-  .google-login-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  
-  .google-login-button {
-    width: 500px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: white;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background 0.2s ease;
-    justify-content: center; /* center content horizontally */
-  
-  }
-  
-  .google-login-button:hover {
-    background-color: #f5f5f5;
-  }
-  
-  .google-icon {
-    width: 18px;
-    height: 18px;
-  }
-  
-  
+:root {
+  --login-bg-color: #1a1d24; /* Deep blue/charcoal */
+  --login-card-bg: #252932; /* Slightly lighter for the card */
+  --login-text-primary: #e0e6f0; /* Light text for readability */
+  --login-text-secondary: #a0aec0; /* Softer text for labels, placeholders */
+  --login-accent-primary: #3b82f6; /* Vibrant blue for primary button */
+  --login-accent-primary-hover: #2563eb;
+  --login-google-button-bg: #ffffff; /* Google button background */
+  --login-google-button-text: #333333; /* Google button text */
+  --login-google-button-border: #d1d5db;
+  --login-google-button-bg-hover: #f9fafb;
+  --login-border-color: #374151; /* Subtle borders for inputs */
+  --login-error-color: #f87171; /* Red for error messages */
+  --login-error-bg: rgba(248, 113, 113, 0.1);
+  --login-input-bg: #2c313a;
+}
+
+/* Apply a base style to the html and body to ensure full page background */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--login-bg-color);
+  color: var(--login-text-primary);
+}
+
+.login-page-container {
+  display: flex;
+  flex-direction: column; /* To accommodate header and main content */
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.08), transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(34, 197, 94, 0.07), transparent 40%),
+    linear-gradient(135deg, var(--login-bg-color) 0%, #111319 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Assuming Header.css might have its own styles */
+/* Add styles for your Header component if it's part of this page layout */
+
+.login-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1; /* Allows this to take up space not used by Header/Footer */
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.login-card {
+  background-color: var(--login-card-bg);
+  padding: 32px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 6px 10px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 400px; /* Max width of the login card */
+  border: 1px solid var(--login-border-color);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-app-logo { /* Style if you add an image logo */
+  max-width: 60px;
+  margin-bottom: 12px;
+}
+
+.login-title {
+  font-size: 1.75rem; /* 28px */
+  font-weight: 600;
+  color: var(--login-text-primary);
+  margin:0; /* Remove default margin if any */
+}
+
+.login-subtitle {
+  font-size: 1rem;
+  color: var(--login-text-secondary);
+  margin-top: 4px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  width: 100%;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  color: var(--login-text-secondary);
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: var(--login-input-bg);
+  border: 1px solid var(--login-border-color);
+  border-radius: 6px;
+  color: var(--login-text-primary);
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: var(--login-text-secondary);
+  opacity: 0.7;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--login-accent-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-container .form-input {
+  padding-right: 40px; /* Space for the toggle icon */
+}
+
+.password-toggle-button {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  background: transparent;
+  border: none;
+  padding: 0 10px;
+  cursor: pointer;
+  color: var(--login-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.password-toggle-button:hover {
+  color: var(--login-text-primary);
+}
+.password-toggle-button svg { /* For lucide icons */
+  stroke-width: 2px;
+}
+
+
+.remember-me-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Changed from space-between to flex-start */
+  margin-top: 8px;
+  font-size: 0.875rem;
+}
+
+.remember-me-checkbox {
+  margin-right: 8px;
+  accent-color: var(--login-accent-primary);
+  width: 16px; /* Custom size */
+  height: 16px; /* Custom size */
+  cursor: pointer;
+}
+
+.remember-me-label {
+  color: var(--login-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.forgot-password-link { /* Optional styling */
+  color: var(--login-accent-primary);
+  text-decoration: none;
+  /* If you re-add this, you might want to revert .remember-me-container to space-between */
+  /* or handle layout differently, e.g., by putting this in its own div and using margin-left: auto */
+}
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+
+.error-message-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--login-error-bg);
+  color: var(--login-error-color);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  border: 1px solid var(--login-error-color);
+  margin-top: 8px; /* Add some space if error appears after remember me */
+}
+
+.error-icon {
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.submit-button {
+  background-color: var(--login-accent-primary);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 8px; /* Space above the button */
+}
+.submit-button:hover:not(:disabled) {
+  background-color: var(--login-accent-primary-hover);
+  transform: translateY(-1px);
+}
+.submit-button:active:not(:disabled) {
+  transform: translateY(0px);
+}
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--login-text-secondary);
+  font-size: 0.8rem;
+  margin: 24px 0;
+}
+.oauth-divider::before,
+.oauth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--login-border-color);
+}
+.oauth-divider span {
+  padding: 0 12px;
+}
+
+.google-login-container {
+  width: 100%;
+}
+
+.google-login-button {
+  background-color: var(--login-google-button-bg);
+  color: var(--login-google-button-text);
+  border: 1px solid var(--login-google-button-border);
+  padding: 10px; /* Slightly less padding than primary */
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 10px;
+}
+.google-login-button:hover:not(:disabled) {
+  background-color: var(--login-google-button-bg-hover);
+  transform: translateY(-1px);
+}
+.google-login-button:active:not(:disabled) {
+  transform: translateY(0px);
+}
+.google-login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.google-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.login-footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.8rem;
+  color: var(--login-text-secondary);
+  opacity: 0.7;
+  width: 100%;
+  box-sizing: border-box;
+}
