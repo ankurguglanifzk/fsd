@@ -154,7 +154,7 @@
 
 .task-create-button {
   padding: 0.6rem 1.2rem;
-  background-color: #28a745;
+  background-color: #fb8e20;
   color: white;
   border: none;
   border-radius: 4px;
@@ -304,3 +304,55 @@
   margin-bottom: 10px;
   opacity: 0.8;
 }
+
+/* In Dashboard.css */
+
+/* ... other styles ... */
+
+.project-details-header-compact {
+  background-color: #2d3748;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 5px solid #60a5fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.project-details-line-one {
+  font-size: 1.25em;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: baseline;
+}
+
+.project-name-compact {
+  font-weight: 600;
+}
+
+.project-description-compact {
+  font-size: 0.9em;
+  color: #cbd5e1;
+  margin-left: 0.5rem;
+  font-weight: 400;
+}
+
+/* MODIFIED STYLE FOR LINE TWO */
+.project-details-line-two {
+  font-size: 1em;
+  color: #a0aec0; /* Medium gray text (slate-400) */
+  display: flex;
+  justify-content: space-between; /* This will spread out the items */
+  align-items: center; /* Vertically align items if they have different heights */
+  flex-wrap: wrap; /* Allow wrapping on very small screens, though space-between might look odd then */
+}
+
+.project-details-line-two span {
+  white-space: nowrap;
+  /* If you want some padding around the items, you can add it here,
+     but space-between should handle the distribution.
+     e.g., padding: 0 0.25rem;
+  */
+}
+
+/* ... rest of your Dashboard.css ... */

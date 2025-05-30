@@ -1,6 +1,9 @@
 // src/components/TaskTable.js
 import React from 'react';
-// import './TaskTable.css'; // Create or use existing styles for the table and buttons
+import './TaskTable.css'
+// We'll add styles to Dashboard.css or create a new TaskCard.css
+// For now, ensure Dashboard.css is imported if you add styles there.
+// import './Dashboard.css'; // Or your new CSS file e.g., './TaskCard.css'
 
 const ALLOWED_TASK_STATUSES = ['new', 'in-progress', 'blocked', 'completed', 'not started'];
 
@@ -10,15 +13,13 @@ const TaskTable = ({
   handleCompleteTask,
   handleDeleteTask,
   handleUpdateTaskStatus,
-  onStartEditTask, // New prop to trigger edit task modal
-  // isAdmin, // Pass if edit/delete task permissions depend on admin role specifically
-  // currentUserRoles, // Pass current user's roles for more granular control
+  onStartEditTask,
 }) => {
   if (!selectedProject) {
     return <p className="info-message">Select a project to view tasks.</p>;
   }
 
-  const tasks = selectedProject.tasks || []; // Ensure tasks is an array (lowercase 't')
+  const tasks = selectedProject.tasks || [];
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -32,43 +33,62 @@ const TaskTable = ({
         });
   };
 
+  // Helper to get a user-friendly class for status styling on cards
   const getStatusClass = (status) =>
-    status ? `status-${status.toLowerCase().replace(/\s+/g, '-')}` : '';
+    status ? `status-card-${status.toLowerCase().replace(/\s+/g, '-')}` : '';
 
   return (
-    <div className="task-table-container">
+    <div className="task-card-container"> {/* New container for cards */}
       {tasksLoading && tasks.length === 0 && <p className="info-message">Loading tasks...</p>}
       
-      <table className="task-table">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Due Date</th>
-            <th>Status</th>
-            <th>Owner</th>
-            <th>Assigned To</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tasks.length > 0 ? (
-            tasks.map((task) => (
-              <tr key={task.TaskID}>
-                <td title={task.Description}>{task.Description}</td>
-                <td>{formatDate(task.DueDate)}</td>
-                <td className={getStatusClass(task.Status)}>
+      {!tasksLoading && tasks.length === 0 && (
+        <div className="no-tasks-container">
+          <img
+            src=".\task.png" // Replace with your image path
+            alt="No tasks"
+            className="no-tasks-image"
+          />
+          <p className="info-message">No tasks found in this project.</p>
+        </div>
+      )}
+
+
+      {tasks.length > 0 && (
+        <div className="task-card-list"> {/* Wrapper for the list of cards */}
+          {tasks.map((task) => (
+            <div key={task.TaskID} className={`task-card ${getStatusClass(task.Status)}`}>
+              <div className="task-card-header">
+                <h4 title={task.Description} className="task-card-description">
+                  {task.Description.length > 50 ? task.Description.substring(0, 47) + "..." : task.Description}
+                </h4>
+                {/* Edit Task Button - using onStartEditTask directly */}
+                <button
+                    onClick={() => onStartEditTask(task)}
+                    className="task-card-action-button task-card-edit-button"
+                    title="Edit Task"
+                    disabled={tasksLoading}
+                >
+                    Edit ✏️
+                </button>
+              </div>
+
+              <div className="task-card-body">
+                <div className="task-card-detail">
+                  <strong>Due Date:</strong> {formatDate(task.DueDate)}
+                </div>
+                <div className="task-card-detail">
+                  <strong>Owner:</strong> {task.OwnerUsername || 'N/A'}
+                </div>
+                <div className="task-card-detail">
+                  <strong>Assigned To:</strong> {task.AssignedToUsername || 'N/A'}
+                </div>
+                <div className="task-card-detail task-card-status-container">
+                  <strong>Status:</strong>
                   <select
                     value={task.Status}
                     onChange={(e) => handleUpdateTaskStatus(task.TaskID, e.target.value)}
                     disabled={tasksLoading}
-                    className="status-dropdown"
-                    style={{ 
-                        padding: '5px', 
-                        borderRadius: '4px', 
-                        border: '1px solid #ccc',
-                        backgroundColor: '#333',
-                        color: '#e0e0e0'
-                    }}
+                    className="task-card-status-dropdown"
                   >
                     {ALLOWED_TASK_STATUSES.map(statusValue => (
                       <option key={statusValue} value={statusValue}>
@@ -76,52 +96,33 @@ const TaskTable = ({
                       </option>
                     ))}
                   </select>
-                </td>
-                <td>{task.OwnerUsername || 'N/A'}</td>
-                <td>{task.AssignedToUsername || 'N/A'}</td>
-                <td className="task-actions-cell">
-                  {/* Edit Task Button */}
+                </div>
+              </div>
+
+              <div className="task-card-actions">
+                {task.Status !== 'completed' && (
                   <button
-                    onClick={() => onStartEditTask(task)}
-                    className="task-action-button" // Style this button
-                    title="Edit Task"
+                    onClick={() => handleCompleteTask(task.TaskID)}
+                    className="task-card-action-button task-card-complete-button"
                     disabled={tasksLoading}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#3498db' }}
+                    title="Mark as Complete"
                   >
-                    ✏️
+                    Complete ✓
                   </button>
-                  {task.Status !== 'completed' && (
-                    <button
-                      onClick={() => handleCompleteTask(task.TaskID)}
-                      className="task-action-button"
-                      disabled={tasksLoading}
-                      title="Mark as Complete"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#2ecc71' }}
-                    >
-                      ✓
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDeleteTask(task.TaskID)}
-                    className="task-delete-button"
-                    disabled={tasksLoading}
-                    title="Delete Task"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#e74c3c' }}
-                  >
-                    🗑️
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6" className="info-message" style={{textAlign: 'center'}}> 
-                {tasksLoading ? "Loading tasks..." : "No tasks found in this project."}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                )}
+                <button
+                  onClick={() => handleDeleteTask(task.TaskID)}
+                  className="task-card-action-button task-card-delete-button"
+                  disabled={tasksLoading}
+                  title="Delete Task"
+                >
+                  Delete 🗑️
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

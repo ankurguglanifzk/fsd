@@ -39,14 +39,12 @@ export default function Dashboard() {
         return isAdmin && user ? [user] : [];
     }, [user, isAdmin]);
 
-    // --- MODIFIED: Renamed and updated to only filter for read_only_user ---
     const readOnlyUsersForTaskAssignment = useMemo(() => {
         // Only allow assigning tasks to users with the 'read_only_user' role
         return allUsers.filter(u =>
             u.roles?.some(role => role.RoleName === "read_only_user")
         );
     }, [allUsers]);
-    // --- END MODIFICATION ---
 
     const apiFetch = async (url, options = {}) => {
         options.credentials = "include";
@@ -344,24 +342,50 @@ export default function Dashboard() {
 
                     {selectedProject ? (
                         <>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-                                <h3 className="main-content-title" style={{ margin: 0 }}>
-                                    {selectedProject.ProjectName || "Selected Project"} - Tasks
-                                </h3>
-                                <p><strong>Description:</strong> {selectedProject.Description || "No description available"}</p>
-                                <p><strong>Owner:</strong> {selectedProject.OwnerUsername || 'N/A'}</p>
-                                <p><strong>Start Date:</strong> {selectedProject.StartDate ? new Date(selectedProject.StartDate).toLocaleDateString() : "N/A"}</p>
-                                <p><strong>End Date:</strong> {selectedProject.EndDate ? new Date(selectedProject.EndDate).toLocaleDateString() : "N/A"}</p>
-                                {canCreateTasks && (
-                                    <button
-                                        className="task-create-button"
-                                        onClick={() => setShowCreateTaskModal(true)}
-                                        disabled={!selectedProject?.ProjectID}
-                                    >
-                                        + Add New Task
-                                    </button>
-                                )}
+                            {/* START: Updated Project Details Display */}
+                            <div className="project-details-header-compact">
+                                <div className="project-details-line-one">
+                                    <span className="project-name-compact">{selectedProject.ProjectName || "Selected Project"}</span>
+                                    {selectedProject.Description && (
+                                        <span className="project-description-compact"> - {selectedProject.Description}</span>
+                                    )}
+                                </div>
+                                <div className="project-details-line-two">
+                                    <span>Owner: {selectedProject.OwnerUsername || 'N/A'}</span>
+                                    <span>|</span>
+                                    <span>Start: {selectedProject.StartDate ? new Date(selectedProject.StartDate).toLocaleDateString() : "N/A"}</span>
+                                    <span>|</span>
+                                    <span>End: {selectedProject.EndDate ? new Date(selectedProject.EndDate).toLocaleDateString() : "N/A"}</span>
+                                </div>
                             </div>
+                            {/* END: Updated Project Details Display */}
+
+                            <div style={{ marginTop: "1.5rem", /* Previous styling for tasks header */ }}>
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center"
+                                }}>
+                                    <h2 style={{ margin: 0 }}>
+                                        Tasks
+                                    </h2>
+                                    {canCreateTasks && (
+                                        <button
+                                            className="task-create-button"
+                                            onClick={() => setShowCreateTaskModal(true)}
+                                            disabled={!selectedProject?.ProjectID}
+                                        >
+                                            + Add New Task
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+
+                
+            
+
+
                             <TaskTable
                                 selectedProject={selectedProject}
                                 tasksLoading={tasksLoading}

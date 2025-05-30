@@ -1,0 +1,162 @@
+
+.no-tasks-container {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    color: #555;
+  }
+  
+  .no-tasks-image {
+    max-width: 100px;
+    width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+    opacity: 0.85;
+  }
+  
+.task-card-container {
+    padding: 1rem 0; /* Adjust as needed */
+  }
+  
+  .task-card-list {
+    display: flex; /* Enables flexbox layout */
+    flex-wrap: wrap; /* Allows cards to wrap to the next line */
+    gap: 1.5rem;     /* Space between cards */
+    justify-content: flex-start; /* Aligns cards to the start, add 'center' or other values if needed */
+  }
+  
+  .task-card {
+    background-color: #3a3f4b; /* Dark card background - adjust to match image */
+    border: 1px solid #4a5568;
+    border-radius: 8px;
+    padding: 1rem;
+    width: calc(30.333% - 1rem); /* Example: 3 cards per row, accounting for gap. Adjust as needed. */
+    min-width: 280px; /* Minimum width for smaller screens / fewer cards */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes actions to the bottom */
+  }
+  
+  /* Make cards take full width on smaller screens if desired */
+  @media (max-width: 992px) {
+    .task-card {
+      width: calc(50% - 0.75rem); /* 2 cards per row */
+    }
+  }
+  @media (max-width: 600px) {
+    .task-card {
+      width: 100%; /* 1 card per row */
+    }
+  }
+  
+  
+  .task-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid #4a5568;
+    padding-bottom: 0.5rem;
+  }
+  
+  .task-card-description {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+    flex-grow: 1; /* Allows description to take available space */
+    margin-right: 0.5rem; /* Space before edit button */
+    word-break: break-word;
+  }
+  
+  .task-card-body {
+    margin-bottom: 1rem;
+    flex-grow: 1; /* Allows body to expand and push actions down */
+  }
+  
+  .task-card-detail {
+    font-size: 0.9em;
+    margin-bottom: 0.5rem;
+    color: #c1c7d0; /* Lighter text for details */
+  }
+  
+  .task-card-detail strong {
+    color: #e0e0e0; /* Slightly more prominent labels */
+  }
+  
+  .task-card-status-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .task-card-status-dropdown {
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #5a6373;
+    background-color: #2c2c2c; /* Darker dropdown bg */
+    color: #e0e0e0;
+    font-size: 0.85em;
+  }
+  
+  .task-card-actions {
+    display: flex;
+    gap: 0.5rem; /* Space between action buttons */
+    justify-content: flex-end; /* Aligns buttons to the right */
+    margin-top: auto; /* Pushes actions to the bottom if card body doesn't fill space */
+  }
+  
+  .task-card-action-button {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    font-size: 0.85em;
+    transition: background-color 0.2s ease;
+  }
+  
+  .task-card-action-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  .task-card-edit-button {
+    background-color: #007bff; /* Blue for edit */
+    font-size: 0.8em;
+    padding: 0.3rem 0.6rem;
+  }
+  .task-card-edit-button:hover:not(:disabled) {
+    background-color: #0056b3;
+  }
+  
+  .task-card-complete-button {
+    background-color: #28a745; /* Green for complete */
+  }
+  .task-card-complete-button:hover:not(:disabled) {
+    background-color: #1e7e34;
+  }
+  
+  .task-card-delete-button {
+    background-color: #dc3545; /* Red for delete */
+  }
+  .task-card-delete-button:hover:not(:disabled) {
+    background-color: #b02a37;
+  }
+  
+  /* Card Status Visual Indicators (optional: could be border color or background tint) */
+  /* Example using a left border, similar to some designs */
+  .task-card.status-card-new { border-left: 5px solid #60a5fa; } /* blue-400 */
+  .task-card.status-card-in-progress { border-left: 5px solid #facc15; } /* yellow-400 */
+  .task-card.status-card-blocked { border-left: 5px solid #f87171; } /* red-400 */
+  .task-card.status-card-completed { border-left: 5px solid #4ade80; opacity: 0.8; } /* green-400 and slightly faded */
+  .task-card.status-card-not-started { border-left: 5px solid #9ca3af; } /* gray-400 */
+  
+  /* Adapt existing table status colors if needed for other elements */
+  .task-table .status-new, .task-card .status-new { color: #60a5fa; }
+  .task-table .status-in-progress, .task-card .status-in-progress { color: #facc15; }
+  .task-table .status-blocked, .task-card .status-blocked { color: #f87171; }
+  .task-table .status-completed, .task-card .status-completed { color: #4ade80; /*text-decoration: line-through; (handled by card style now)*/ }
+  .task-table .status-not-started, .task-card .status-not-started { color: #9ca3af; }
