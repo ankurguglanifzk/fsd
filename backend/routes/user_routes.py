@@ -226,7 +226,6 @@ def create_user():
         return jsonify({"message": "An unexpected error occurred.", "error": str(e)}), 500
 
 @user_routes.route('/', methods=['GET'])
-@role_required('admin') 
 def list_users():
     try:
         users = User.query.all()
