@@ -30,20 +30,22 @@ export default function Dashboard() {
     const [showEditTaskModal, setShowEditTaskModal] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
 
-    const isAdmin = user?.roles?.includes("admin");
-    const isTaskCreator = user?.roles?.includes("task_creator");
+    const isAdmin = user?.roles?.includes("admin"); //
+    const isTaskCreator = user?.roles?.includes("task_creator"); //
+    // You can add more role checks if needed, e.g.:
+    // const isReadOnlyUser = user?.roles?.includes("read_only_user");
 
-    const canCreateTasks = useMemo(() => isAdmin || isTaskCreator, [isAdmin, isTaskCreator]);
+    const canCreateTasks = useMemo(() => isAdmin || isTaskCreator, [isAdmin, isTaskCreator]); //
 
     const projectOwnerOptionsForEditModal = useMemo(() => {
-        return isAdmin && user ? [user] : [];
+        return isAdmin && user ? [user] : []; //
     }, [user, isAdmin]);
 
     const readOnlyUsersForTaskAssignment = useMemo(() => {
         // Only allow assigning tasks to users with the 'read_only_user' role
         return allUsers.filter(u =>
             u.roles?.some(role => role.RoleName === "read_only_user")
-        );
+        ); //
     }, [allUsers]);
 
     const apiFetch = async (url, options = {}) => {
@@ -305,6 +307,20 @@ export default function Dashboard() {
         }
     };
 
+    // --- MODIFICATION START: Determine message based on role ---
+    let noProjectSelectedMessage = "Select a project to view its tasks."; // Default message
+    if (isAdmin) {
+        noProjectSelectedMessage = "Select a project to manage its tasks, or create a new project to get started.";
+    } else if (isTaskCreator) {
+        noProjectSelectedMessage = "Select a project to view its tasks. You can add new tasks to the selected project.";
+    }
+    // You can add more 'else if' conditions here for other roles if needed.
+    // For example:
+    // else if (isReadOnlyUser) {
+    //     noProjectSelectedMessage = "Please select a project to see task details.";
+    // }
+    // --- MODIFICATION END ---
+
     return (
         <div className="dashboard-container">
             <Header />
@@ -380,12 +396,6 @@ export default function Dashboard() {
                                     )}
                                 </div>
                             </div>
-
-
-                
-            
-
-
                             <TaskTable
                                 selectedProject={selectedProject}
                                 tasksLoading={tasksLoading}
@@ -397,10 +407,12 @@ export default function Dashboard() {
                             
                         </>
                     ) : (
+                        // --- MODIFICATION START: Use the dynamic message ---
                         !loading && <div className="info-container">
-                        <img src="./project.png" alt="No project selected" className="info-image" />
-                        <p className="info-message">Select a project to see its tasks or create a new one.</p>
+                        <img src="./project.png" alt="No project selected" className="info-image" /> 
+                        <p className="info-message">{noProjectSelectedMessage}</p>
                       </div>
+                      // --- MODIFICATION END ---
                   
                     )}
                     {loading && !selectedProject && <p className="info-message">Loading projects...</p>}
@@ -416,14 +428,14 @@ export default function Dashboard() {
                 />
             )}
 
-            {canCreateTasks && showCreateTaskModal && (
+            {canCreateTasks && showCreateTaskModal && ( //
                 <CreateTaskModal
                     isOpen={showCreateTaskModal}
                     onClose={() => setShowCreateTaskModal(false)}
                     onSubmit={handleCreateTask}
                     projectId={selectedProject?.ProjectID}
                     currentUser={user}
-                    users={readOnlyUsersForTaskAssignment} 
+                    users={readOnlyUsersForTaskAssignment}  //
                 />
             )}
 
@@ -433,7 +445,7 @@ export default function Dashboard() {
                     onClose={handleCloseEditProjectModal}
                     project={editingProject}
                     onUpdate={handleUpdateProject}
-                    users={projectOwnerOptionsForEditModal}
+                    users={projectOwnerOptionsForEditModal} //
                 />
             )}
 
@@ -443,7 +455,7 @@ export default function Dashboard() {
                     onClose={handleCloseEditTaskModal}
                     task={editingTask}
                     onUpdate={handleUpdateTask}
-                    users={readOnlyUsersForTaskAssignment} 
+                    users={readOnlyUsersForTaskAssignment}  //
                     currentProject={selectedProject}
                 />
             )}

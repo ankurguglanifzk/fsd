@@ -10,6 +10,24 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   height: 4.5rem; /* consistent height */
 }
+.header-actions {
+  display: flex; /* To align buttons in a row */
+  align-items: center;
+}
+.header-button {
+  /* Common styling for header buttons */
+  background-color: transparent;
+  color: black; /* Example text color */
+  margin-right: 10px; /* Space between buttons */
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 0.7rem; 
+
+  padding: 0.5rem 0.5rem;
+}
+
 
 /* Logo container and image */
 .logo-container {

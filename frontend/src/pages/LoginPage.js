@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Header from './Header'; // Assuming Header component exists
 import './LoginPage.css'; // Assuming LoginPage.css exists
 
-export function LoginPage() { // Changed to named export if that's the intention
+export default function LoginPage() { // Changed to named export if that's the intention
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);

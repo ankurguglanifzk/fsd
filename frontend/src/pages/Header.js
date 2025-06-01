@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Added Link
 import './Header.css';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -21,9 +21,25 @@ const LogoutIcon = ({ className }) => (
   </svg>
 );
 
+// Placeholder User Management Icon (Optional)
+const UserManagementIcon = ({ className }) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 016-6h6a6 6 0 016 6v1h-3M18 18h3m-1.5-1.5V21m-3.182-6.325a4.001 4.001 0 00-5.636 0M17 10a1 1 0 11-2 0 1 1 0 012 0z" />
+  </svg>
+);
+
+
 const Header = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, logout: contextLogout } = useAuth();
+  const { user, isAuthenticated, logout: contextLogout } = useAuth(); // Get user object
+
+  const isAdmin = user?.roles?.includes('admin'); // Check if user is admin
 
   const handleLogout = async () => {
     try {
@@ -33,22 +49,30 @@ const Header = () => {
       });
 
       if (response.ok) {
-        contextLogout?.(); // Optional chaining in case it's undefined
+        contextLogout?.();
         navigate('/login');
       } else {
         const errorData = await response.text();
         console.error('Logout API failed:', response.status, errorData);
+        // Optionally, still log out on frontend if API fails but contextLogout is available
+        // contextLogout?.();
+        // navigate('/login');
       }
     } catch (error) {
       console.error('Logout error:', error);
+      // Optionally, still log out on frontend if API fails but contextLogout is available
+      // contextLogout?.();
+      // navigate('/login');
     }
   };
+
+  // Removed handleNewButtonClick as it's being replaced by User Management link
 
   return (
     <div className="app-header">
       <div className="logo-container">
         <img
-          src="/task-tracker.png"
+          src="/task-tracker.png" // Ensure this path is correct from your public folder
           alt="Task Tracker Logo"
           className="header-logo"
         />
@@ -57,14 +81,24 @@ const Header = () => {
       <div className="header-title">Task Tracker</div>
 
       {isAuthenticated && (
-        <button
-          onClick={handleLogout}
-          className="logout-button"
-          aria-label="Logout"
-        >
-          <LogoutIcon className="logout-icon" />
-          <span>Logout</span>
-        </button>
+        <div className="header-actions">
+          {/* Conditionally render User Management Link for Admins */}
+          {isAdmin && (
+            <Link to="/admin/user-management" className="header-button user-management-button" aria-label="User Management">
+              <UserManagementIcon className="header-icon" /> {/* Optional Icon */}
+              <span>Manage Users</span>
+            </Link>
+          )}
+
+          <button
+            onClick={handleLogout}
+            className="header-button logout-button"
+            aria-label="Logout"
+          >
+            <LogoutIcon className="logout-icon header-icon" />
+            <span>Logout</span>
+          </button>
+        </div>
       )}
     </div>
   );
