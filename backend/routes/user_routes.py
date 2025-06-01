@@ -172,58 +172,69 @@ def create_user():
     password = data.get('Password')
     email = data.get('Email')
     full_name = data.get('FullName')
-    role_names_to_assign = data.get('roles', [])
+    # --- MODIFIED: Expect a single RoleName ---
+    role_name_to_assign = data.get('RoleName')
 
     if not username or not password:
         return jsonify({"message": "Username and Password are required"}), 400
 
-    if not role_names_to_assign:
-        return jsonify({"message": "At least one role must be assigned"}), 400
+    # --- MODIFIED: Validate single RoleName ---
+    if not role_name_to_assign or not isinstance(role_name_to_assign, str) or not role_name_to_assign.strip():
+        return jsonify({"message": "A valid RoleName (non-empty string) must be assigned"}), 400
 
     allowed_roles = get_all_role_names()
-    if not allowed_roles:
+    if not allowed_roles: # Should not happen if DB is okay
         return jsonify({"message": "Could not retrieve roles from the database. Cannot proceed."}), 500
 
-    invalid_roles = [r for r in role_names_to_assign if r not in allowed_roles]
-    if invalid_roles:
-        # --- MODIFIED ERROR MESSAGE ---
-        return jsonify({"message": f"Role(s) '{', '.join(invalid_roles)}' cannot be assigned. Please use roles from the available list: {', '.join(allowed_roles)}"}), 400
-        # --- END MODIFICATION ---
+    if role_name_to_assign not in allowed_roles:
+        return jsonify({
+            "message": f"Role '{role_name_to_assign}' cannot be assigned. Please use a role from the available list: {', '.join(allowed_roles)}"
+        }), 400
+    # --- END OF MODIFICATIONS for role validation ---
 
     try:
         if User.query.filter_by(Username=username).first():
-            return jsonify({"message": f"Username '{username}' already exists."}), 409
+            return jsonify({"message": f"Username '{username}' already exists."}), 409 # Conflict
         if email and User.query.filter_by(Email=email).first():
-            return jsonify({"message": f"Email '{email}' already exists."}), 409
+            return jsonify({"message": f"Email '{email}' already exists."}), 409 # Conflict
 
         new_user = User(Username=username, FullName=full_name, Email=email)
-        new_user.set_password(password)
+        new_user.set_password(password) # Hashes and sets the password
         db.session.add(new_user)
-        db.session.flush()
+        db.session.flush() # Flush to get new_user.UserID before assigning role
 
-        assigned_roles_feedback = []
-        for role_name in role_names_to_assign:
-            role = Role.query.filter_by(RoleName=role_name).first()
-            if role:
-                user_role = UserRole(UserID=new_user.UserID, RoleID=role.RoleID)
-                db.session.add(user_role)
-                assigned_roles_feedback.append(role.RoleName)
-
+        # --- MODIFIED: Assign single role ---
+        assigned_role_feedback_name = None
+        role_obj = Role.query.filter_by(RoleName=role_name_to_assign).first()
+        if role_obj:
+            user_role_link = UserRole(UserID=new_user.UserID, RoleID=role_obj.RoleID)
+            db.session.add(user_role_link)
+            assigned_role_feedback_name = role_obj.RoleName
+        else:
+            # This should not be reached if validation above is correct
+            db.session.rollback()
+            return jsonify({"message": f"Internal error: Role '{role_name_to_assign}' validated but not found during assignment."}), 500
+        # --- END OF MODIFICATIONS for role assignment ---
+        
         db.session.commit()
 
         return jsonify({
             "message": "User created successfully",
             "UserID": new_user.UserID,
             "Username": new_user.Username,
-            "roles": assigned_roles_feedback
+            # Return the single role assigned. Frontend might expect an array, adjust if needed.
+            # For consistency with how 'roles' is often structured, returning as a list with one item:
+            "roles": [{"RoleName": assigned_role_feedback_name}] if assigned_role_feedback_name else [] 
         }), 201
 
     except IntegrityError as e:
         db.session.rollback()
-        return jsonify({"message": "Database integrity error.", "error_detail": str(e.orig)}), 400
+        return jsonify({"message": "Database integrity error during user creation.", "error_detail": str(e.orig)}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({"message": "An unexpected error occurred.", "error": str(e)}), 500
+        # Log the exception e for server-side debugging
+        print(f"Unexpected error during user creation: {e}")
+        return jsonify({"message": "An unexpected error occurred while creating the user.", "error": str(e)}), 500
 
 @user_routes.route('/', methods=['GET'])
 def list_users():
@@ -253,15 +264,15 @@ def get_user(user_id):
     }), 200
 
 @user_routes.route('/<int:user_id>', methods=['PUT'])
-@role_required('admin') 
+@role_required('admin')
 def update_user(user_id):
     user = User.query.get_or_404(user_id, description=f"User with ID {user_id} not found.")
     data = request.json
     if not data:
         return jsonify({"message": "No input data"}), 400
 
-    allowed_roles = get_all_role_names()
-    if not allowed_roles:
+    allowed_roles_names = get_all_role_names() # Fetch set of allowed role names
+    if not allowed_roles_names:
          return jsonify({"message": "Could not retrieve roles from the database. Cannot proceed."}), 500
 
     try:
@@ -270,52 +281,67 @@ def update_user(user_id):
 
         if 'Email' in data:
             new_email = data.get('Email')
+            # Check if email is changing and if the new email is already used by another user
             if new_email and new_email != user.Email and User.query.filter(User.Email == new_email, User.UserID != user_id).first():
                 return jsonify({"message": f"Email '{new_email}' is already in use."}), 409
             user.Email = new_email
 
-        if 'Password' in data and data['Password']:
+        if 'Password' in data and data['Password']: # Check if password is provided and not empty
             user.set_password(data['Password'])
 
         if 'IsActive' in data and isinstance(data['IsActive'], bool):
             user.IsActive = data['IsActive']
 
-        if 'roles' in data and isinstance(data.get('roles'), list):
-            new_role_names = set(data['roles'])
+        # --- MODIFIED ROLE UPDATE LOGIC FOR SINGLE ROLE ---
+        if 'RoleName' in data:
+            new_role_name = data.get('RoleName')
 
-            invalid_roles = new_role_names - allowed_roles
-            if invalid_roles:
-                # --- MODIFIED ERROR MESSAGE ---
-                return jsonify({"message": f"Role(s) '{', '.join(invalid_roles)}' cannot be assigned. Please use roles from the available list: {', '.join(allowed_roles)}"}), 400
-                # --- END MODIFICATION ---
+            if not isinstance(new_role_name, str) or not new_role_name.strip():
+                return jsonify({"message": "RoleName must be a non-empty string."}), 400
 
-            current_user_roles = UserRole.query.filter_by(UserID=user.UserID).all()
-            current_role_ids = {ur.RoleID for ur in current_user_roles}
+            if new_role_name not in allowed_roles_names:
+                return jsonify({
+                    "message": f"Role '{new_role_name}' cannot be assigned. Please use a role from the available list: {', '.join(allowed_roles_names)}"
+                }), 400
 
-            roles_to_add_ids = []
-            for role_name_to_add in new_role_names:
-                role_obj = Role.query.filter_by(RoleName=role_name_to_add).first()
-                if role_obj:
-                    roles_to_add_ids.append(role_obj.RoleID)
+            # Find the new role object
+            role_to_assign = Role.query.filter_by(RoleName=new_role_name).first()
+            if not role_to_assign:
+                # This should ideally not happen if new_role_name is in allowed_roles_names
+                return jsonify({"message": f"Role '{new_role_name}' not found in database roles."}), 404
 
-            for role_id_to_add in roles_to_add_ids:
-                if role_id_to_add not in current_role_ids:
-                    db.session.add(UserRole(UserID=user.UserID, RoleID=role_id_to_add))
-
-            for ur_assoc in current_user_roles:
-                role_obj = Role.query.get(ur_assoc.RoleID)
-                if role_obj and role_obj.RoleName not in new_role_names:
-                    db.session.delete(ur_assoc)
+            # Remove all existing role associations for this user
+            UserRole.query.filter_by(UserID=user.UserID).delete()
+            
+            # Add the new single role association
+            new_user_role_assoc = UserRole(UserID=user.UserID, RoleID=role_to_assign.RoleID)
+            db.session.add(new_user_role_assoc)
+            # --- END OF MODIFIED ROLE UPDATE LOGIC ---
 
         db.session.commit()
-        return jsonify({"message": "User updated", "UserID": user.UserID}), 200
+        # Fetch the updated user with roles to return
+        updated_user_info = User.query.get(user_id)
+        roles_data = [{"RoleID": r.RoleID, "RoleName": r.RoleName} for r in updated_user_info.roles]
+
+        return jsonify({
+            "message": "User updated successfully",
+            "UserID": updated_user_info.UserID,
+            "Username": updated_user_info.Username,
+            "FullName": updated_user_info.FullName,
+            "Email": updated_user_info.Email,
+            "IsActive": updated_user_info.IsActive,
+            "roles": roles_data # Return the updated roles
+        }), 200
 
     except IntegrityError as e:
         db.session.rollback()
-        return jsonify({"message": "Database integrity error.", "error_detail": str(e.orig)}), 400
+        # It's helpful to log the original error e.orig for debugging
+        return jsonify({"message": "Database integrity error during update.", "error_detail": str(e.orig)}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({"message": "Unexpected error.", "error": str(e)}), 500
+        # Log the full exception e for debugging
+        return jsonify({"message": "An unexpected error occurred during user update.", "error": str(e)}), 500
+
 
 @user_routes.route('/<int:user_id>', methods=['DELETE'])
 @role_required('admin')
