@@ -7,11 +7,11 @@ import {
   Navigate
 } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import  LoginPage  from './pages/LoginPage'; // Assuming named export, adjust if default
+import  LoginPage  from './pages/Login/LoginPage'; // Assuming named export, adjust if default
 import Dashboard from './pages/Dashboard';
-import Header from './pages/Header'
+import Header from './pages/Header/Header'
 // Corrected import path based on the user's image showing UserManagementPage.js in src/pages/Admin/
-import UserManagementPage from './pages/UserManagementPage'; 
+import UserManagementPage from './pages/UserManagementPage/UserManagementPage'; 
 
 // ProtectedRoute for general authenticated access
 function ProtectedRoute({ children }) {

@@ -1,9 +1,9 @@
 // src/pages/Admin/UserManagementPage.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext'; // Corrected path
-import UserList from '../User/UserList'; // Path based on uploaded UserManagementPage.js and image
-import CreateUserModal from '../User/CreateUserModal'; // Path based on uploaded UserManagementPage.js and image
-import EditUserModal from '../User/EditUserModal'; // Path based on uploaded UserManagementPage.js and image
+import { useAuth } from '../../contexts/AuthContext'; // Corrected path
+import UserList from '../../User/UserList'; // Path based on uploaded UserManagementPage.js and image
+import CreateUserModal from '../../User/CreateUserModal'; // Path based on uploaded UserManagementPage.js and image
+import EditUserModal from '../../User/EditUserModal'; // Path based on uploaded UserManagementPage.js and image
 import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import './UserManagementPage.css'; 
 

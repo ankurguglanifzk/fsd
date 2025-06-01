@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom'; // Added Link
 import './Header.css';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 // SVG Logout Icon Component
 const LogoutIcon = ({ className }) => (

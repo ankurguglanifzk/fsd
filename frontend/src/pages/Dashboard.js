@@ -1,12 +1,12 @@
 // src/pages/Dashboard.js
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import Header from "./Header";
-import ProjectList from "./ProjectList";
-import TaskTable from "./TaskTable";
-import CreateProjectModal from "./CreateProjectModal";
-import CreateTaskModal from "./CreateTaskModal";
-import EditProjectModal from "./EditProjectModal";
-import EditTaskModal from "./EditTaskModel"; 
+import Header from "../pages/Header/Header";
+import ProjectList from "../pages/Project/ProjectList";
+import TaskTable from "../pages/Task/TaskTable";
+import CreateProjectModal from "../pages/Project/CreateProjectModal";
+import CreateTaskModal from "../pages//Task/CreateTaskModal";
+import EditProjectModal from "../pages//Project/EditProjectModal";
+import EditTaskModal from "../pages/Task/EditTaskModel"; 
 import { useAuth } from "../contexts/AuthContext";
 import "./Dashboard.css";
 

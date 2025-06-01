@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AlertTriangle, Loader2, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import Header from './Header'; // Assuming Header component exists
+import { useAuth } from '../../contexts/AuthContext';
+import Header from '../Header/Header'; // Assuming Header component exists
 import './LoginPage.css'; // Assuming LoginPage.css exists
 
 export default function LoginPage() { // Changed to named export if that's the intention
