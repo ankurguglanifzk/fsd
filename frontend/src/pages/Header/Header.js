@@ -72,7 +72,7 @@ const Header = () => {
     <div className="app-header">
       <div className="logo-container">
         <img
-          src="/task-tracker.png" // Ensure this path is correct from your public folder
+          src="./task-tracker.png" // Ensure this path is correct from your public folder
           alt="Task Tracker Logo"
           className="header-logo"
         />
