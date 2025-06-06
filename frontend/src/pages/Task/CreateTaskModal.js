@@ -1,4 +1,4 @@
-// src/components/CreateTaskModal.js (MODIFIED to make fields required)
+// src/components/CreateTaskModal.js
 import React, { useState, useEffect } from 'react';
 import './CreateTaskModal.css';
 
@@ -9,11 +9,12 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, projectId, 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setDescription('');
       setDueDate('');
-      setAssignedTo(''); // Reset to empty, forcing a selection
+      setAssignedTo('');
       setError('');
       setLoading(false);
     }
@@ -23,25 +24,24 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, projectId, 
     e.preventDefault();
     setError('');
 
-    // --- MODIFIED: Added checks for required fields ---
+    // --- Required fields check ---
     if (!description.trim()) {
       setError('Description is required.');
       return;
     }
     if (!dueDate) {
-        setError('Due Date is required.');
-        return;
+      setError('Due Date is required.');
+      return;
     }
     if (!assignedTo) {
-        setError('Assign To user is required.');
-        return;
+      setError('Assigned User is required.');
+      return;
     }
-    // --- END MODIFICATION ---
 
     const taskData = {
       Description: description.trim(),
-      DueDate: dueDate, // Now required, send the value
-      AssignedToUserID: assignedTo, // Now required, send the value
+      DueDate: dueDate,
+      AssignedToUserID: assignedTo,
       ProjectID: projectId,
       Status: 'new',
     };
@@ -63,9 +63,10 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, projectId, 
     <div className="modal-overlay">
       <div className="modal-content">
         <h3>Create New Task</h3>
-        {/* --- MODIFIED: Ensure error message is visible and styled --- */}
+
+        {/* Error Message */}
         {error && <p className="error-message" style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
-        {/* --- END MODIFICATION --- */}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="task-description">Description:</label>
@@ -73,7 +74,8 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, projectId, 
               id="task-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              required // Already present
+              required
+              placeholder="Enter task description"
             />
           </div>
 
@@ -84,7 +86,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, projectId, 
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              required // --- MODIFIED: Add required ---
+              required
             />
           </div>
 
@@ -94,11 +96,9 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, projectId, 
               id="task-assignedTo"
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
-              required // --- MODIFIED: Add required ---
+              required
             >
-              {/* --- MODIFIED: Update default option for clarity when required --- */}
               <option value="">-- Select User --</option>
-              {/* --- END MODIFICATION --- */}
               {Array.isArray(users) && users.map((user) => (
                 <option key={user.UserID} value={user.UserID}>
                   {user.FullName || user.Username} ({user.Username})
@@ -106,6 +106,7 @@ export default function CreateTaskModal({ isOpen, onClose, onSubmit, projectId, 
               ))}
             </select>
           </div>
+
           <div className="modal-actions">
             <button type="submit" disabled={loading} className="button-primary">
               {loading ? 'Creating...' : 'Create Task'}

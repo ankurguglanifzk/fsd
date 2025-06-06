@@ -1,17 +1,16 @@
 // src/pages/Admin/UserManagementPage.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../contexts/AuthContext'; // Corrected path
-import UserList from '../../User/UserList'; // Path based on uploaded UserManagementPage.js and image
-import CreateUserModal from '../../User/CreateUserModal'; // Path based on uploaded UserManagementPage.js and image
-import EditUserModal from '../../User/EditUserModal'; // Path based on uploaded UserManagementPage.js and image
-import { useNavigate, Link } from 'react-router-dom'; // Import Link
+import { useAuth } from '../../contexts/AuthContext';
+import UserList from '../../User/UserList'; 
+import CreateUserModal from '../../User/CreateUserModal';
+import EditUserModal from '../../User/EditUserModal'; 
+import { useNavigate, Link } from 'react-router-dom';
+import api from '../../api'; // MODIFIED: Import the central api instance
 import './UserManagementPage.css'; 
 
-
-const API_BASE_USERS = "http://localhost:5000/api/v1/users";
-
 const UserManagementPage = () => {
-  const { user, apiFetch } = useAuth(); 
+  // MODIFIED: 'apiFetch' is no longer provided by the context.
+  const { user } = useAuth(); 
   const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
@@ -26,6 +25,7 @@ const UserManagementPage = () => {
 
   const isAdmin = user?.roles?.includes('admin');
 
+  // This effect correctly redirects non-admins.
   useEffect(() => {
     if (user === undefined) return; 
     if (!isAdmin) {
@@ -34,42 +34,32 @@ const UserManagementPage = () => {
     }
   }, [user, isAdmin, navigate]);
 
-
+  // MODIFIED: All data fetching now uses the 'api' object.
   const fetchUsers = useCallback(async () => {
     if (!isAdmin) return;
     setIsLoading(true);
     setError('');
     try {
-      if (typeof apiFetch !== 'function') {
-        console.error("apiFetch is not a function. Check AuthContext.");
-        setError("Configuration error: apiFetch not available.");
-        setIsLoading(false);
-        return;
-      }
-      const data = await apiFetch(`${API_BASE_USERS}/`); 
-      setUsers(data || []);
+      const response = await api.get('/users/'); 
+      setUsers(response.data || []);
     } catch (err) {
-      setError(`Failed to fetch users: ${err.message}`);
+      setError(`Failed to fetch users: ${err.response?.data?.message || err.message}`);
       setUsers([]);
     } finally {
       setIsLoading(false);
     }
-  }, [apiFetch, isAdmin]); 
+  }, [isAdmin]); 
 
   const fetchAllSystemRoles = useCallback(async () => {
     if (!isAdmin) return;
     try {
-      if (typeof apiFetch !== 'function') {
-        setError(prevError => `${prevError} Configuration error: apiFetch not available for roles.`.trim());
-        return;
-      }
-      const data = await apiFetch(`${API_BASE_USERS}/roles`); 
-      setAllSystemRoles(data || []);
+      const response = await api.get('/users/roles'); 
+      setAllSystemRoles(response.data || []);
     } catch (err) {
-      setError(prevError => `${prevError} Failed to fetch roles: ${err.message}`.trim());
+      setError(prevError => `${prevError} Failed to fetch roles: ${err.response?.data?.message || err.message}`.trim());
       setAllSystemRoles([]);
     }
-  }, [apiFetch, isAdmin]); 
+  }, [isAdmin]); 
 
   useEffect(() => {
     if (isAdmin) {
@@ -83,15 +73,11 @@ const UserManagementPage = () => {
     setIsSubmitting(true);
     setError('');
     try {
-      if (typeof apiFetch !== 'function') throw new Error("apiFetch is not available.");
-      await apiFetch(`${API_BASE_USERS}/`, { 
-        method: 'POST',
-        body: JSON.stringify(userData),
-      });
+      await api.post('/users/', userData);
       setShowCreateModal(false);
       fetchUsers(); 
     } catch (err) {
-      setError(`Failed to create user: ${err.message}`);
+      setError(`Failed to create user: ${err.response?.data?.message || err.message}`);
       throw err; 
     } finally {
       setIsSubmitting(false);
@@ -108,16 +94,12 @@ const UserManagementPage = () => {
     setIsSubmitting(true);
     setError('');
     try {
-      if (typeof apiFetch !== 'function') throw new Error("apiFetch is not available.");
-      await apiFetch(`${API_BASE_USERS}/${userId}`, { 
-        method: 'PUT',
-        body: JSON.stringify(userData),
-      });
+      await api.put(`/users/${userId}`, userData);
       setShowEditModal(false);
       setUserToEdit(null);
       fetchUsers(); 
     } catch (err) {
-      setError(`Failed to update user: ${err.message}`);
+      setError(`Failed to update user: ${err.response?.data?.message || err.message}`);
       throw err; 
     } finally {
       setIsSubmitting(false);
@@ -133,28 +115,26 @@ const UserManagementPage = () => {
       setIsLoading(true); 
       setError('');
       try {
-        if (typeof apiFetch !== 'function') throw new Error("apiFetch is not available.");
-        await apiFetch(`${API_BASE_USERS}/${userId}`, { method: 'DELETE' });
+        await api.delete(`/users/${userId}`);
         fetchUsers(); 
       } catch (err) {
-        setError(`Failed to delete user: ${err.message}`);
+        setError(`Failed to delete user: ${err.response?.data?.message || err.message}`);
       } finally {
         setIsLoading(false);
       }
     }
   };
   
-  if (user === undefined ) { 
+  if (user === undefined) { 
     return <div className="loading-container"><p>Loading user data...</p></div>; 
   }
   if (!isAdmin) { 
     return <div className="loading-container"><p>Access Denied. Redirecting...</p></div>;
   }
 
-
+  // The JSX structure remains the same
   return (
     <div className="user-management-page">
-      
       <header className="ump-header">
         <Link to="/dashboard" className="button-secondary back-to-dashboard-button">
           &larr; Back to Dashboard 

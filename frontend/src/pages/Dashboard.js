@@ -1,28 +1,27 @@
 // src/pages/Dashboard.js
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import Header from "../pages/Header/Header";
 import ProjectList from "../pages/Project/ProjectList";
 import TaskTable from "../pages/Task/TaskTable";
 import CreateProjectModal from "../pages/Project/CreateProjectModal";
-import CreateTaskModal from "../pages//Task/CreateTaskModal";
-import EditProjectModal from "../pages//Project/EditProjectModal";
+import CreateTaskModal from "../pages/Task/CreateTaskModal";
+import EditProjectModal from "../pages/Project/EditProjectModal";
 import EditTaskModal from "../pages/Task/EditTaskModel"; 
 import { useAuth } from "../contexts/AuthContext";
+import api from '../api'; 
 import "./Dashboard.css";
-
-const API_BASE_PROJECTS = "http://localhost:5000/api/v1/projects";
-const API_BASE_TASKS = "http://localhost:5000/api/v1/tasks";
-const API_BASE_USERS = "http://localhost:5000/api/v1/users";
 
 export default function Dashboard() {
     const { user } = useAuth();
+    
+    // State for data
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
+    const [allUsers, setAllUsers] = useState([]);
+
+    // State for UI management
     const [loading, setLoading] = useState(false);
     const [tasksLoading, setTasksLoading] = useState(false);
     const [error, setError] = useState("");
-    const [allUsers, setAllUsers] = useState([]);
-
     const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
     const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
     const [showEditProjectModal, setShowEditProjectModal] = useState(false);
@@ -30,315 +29,164 @@ export default function Dashboard() {
     const [showEditTaskModal, setShowEditTaskModal] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
 
-    const isAdmin = user?.roles?.includes("admin"); //
-    const isTaskCreator = user?.roles?.includes("task_creator"); //
-    // You can add more role checks if needed, e.g.:
-    // const isReadOnlyUser = user?.roles?.includes("read_only_user");
+    // --- Memoized values for roles ---
+    const userRoles = useMemo(() => new Set(user?.roles || []), [user]);
+    const isAdmin = userRoles.has("admin");
+    const canCreateTasks = isAdmin || userRoles.has("task_creator");
 
-    const canCreateTasks = useMemo(() => isAdmin || isTaskCreator, [isAdmin, isTaskCreator]); //
-
-    const projectOwnerOptionsForEditModal = useMemo(() => {
-        return isAdmin && user ? [user] : []; //
-    }, [user, isAdmin]);
-
-    const readOnlyUsersForTaskAssignment = useMemo(() => {
-        // Only allow assigning tasks to users with the 'read_only_user' role
-        return allUsers.filter(u =>
-            u.roles?.some(role => role.RoleName === "read_only_user")
-        ); //
+    const assignableUsers = useMemo(() => {
+        return allUsers.filter(u => u.roles?.some(r => r.RoleName === "read_only_user"));
     }, [allUsers]);
 
-    const apiFetch = async (url, options = {}) => {
-        options.credentials = "include";
-        options.headers = {
-            "Content-Type": "application/json",
-            ...options.headers,
-        };
-        const res = await fetch(url, options);
-        const text = await res.text();
-        if (!res.ok) {
-            try {
-                const errData = JSON.parse(text);
-                throw new Error(errData.message || `Request failed: ${res.status}`);
-            } catch {
-                throw new Error(text || `Request failed: ${res.status}`);
-            }
-        }
-        if (res.status === 204 || !text) return { message: "Operation successful" };
-        try {
-            return JSON.parse(text);
-        } catch (e) {
-            console.error("Failed to parse JSON response:", text, e);
-            throw new Error("Invalid JSON response from server.");
-        }
-    };
-
+    // --- Data Fetching Callbacks ---
     const fetchProjects = useCallback(async () => {
         setLoading(true);
         setError("");
         try {
-            const data = await apiFetch(`${API_BASE_PROJECTS}/`);
-            setProjects(data);
+            const response = await api.get('/projects/');
+            setProjects(response.data);
         } catch (err) {
-            setError(`Workspace Projects: ${err.message}`);
-            setProjects([]);
+            setError(`Failed to load projects: ${err.response?.data?.message || err.message}`);
         } finally {
             setLoading(false);
         }
     }, []);
 
     const fetchAllUsers = useCallback(async () => {
-        setError("");
-        try {
-            const data = await apiFetch(`${API_BASE_USERS}/`);
-            setAllUsers(data);
-        } catch (err) {
-            
-            setAllUsers([]);
-        }
-    }, []);
+        if (!canCreateTasks) return; 
 
-    const fetchProjectDetails = useCallback(async (projectToSelect) => {
-        if (!projectToSelect?.ProjectID) {
+        try {
+            const response = await api.get('/users/');
+            setAllUsers(response.data);
+        } catch (err) {
+            setError(`Failed to load user list: ${err.response?.data?.message || err.message}`);
+        }
+    }, [canCreateTasks]);
+
+    const fetchProjectDetails = useCallback(async (project) => {
+        if (!project?.ProjectID) {
             setSelectedProject(null);
             return;
         }
         setTasksLoading(true);
         setError("");
-        setSelectedProject(prev => ({ ...prev, ...projectToSelect, tasks: prev?.ProjectID === projectToSelect.ProjectID ? prev.tasks : [] }));
+        setSelectedProject(prev => ({ ...prev, ...project, tasks: [] }));
         try {
-            const detailedProject = await apiFetch(`${API_BASE_PROJECTS}/${projectToSelect.ProjectID}`);
-            setSelectedProject(detailedProject);
+            const response = await api.get(`/projects/${project.ProjectID}`);
+            setSelectedProject(response.data);
         } catch (err) {
-            setError(`Workspace Project Details for ${projectToSelect.ProjectName}: ${err.message}`);
-            setSelectedProject({ ...projectToSelect, tasks: [] });
+            setError(`Failed to load details for ${project.ProjectName}: ${err.response?.data?.message || err.message}`);
+            setSelectedProject({ ...project, tasks: [] });
         } finally {
             setTasksLoading(false);
         }
     }, []);
 
+    // Initial data fetch
     useEffect(() => {
         if (user?.UserID) {
             fetchProjects();
             fetchAllUsers();
-        } else {
-            setProjects([]);
-            setSelectedProject(null);
-            setAllUsers([]);
         }
     }, [user, fetchProjects, fetchAllUsers]);
-
-    useEffect(() => {
-        if (error) {
-            const timer = setTimeout(() => setError(""), 7000);
-            return () => clearTimeout(timer);
-        }
-    }, [error]);
-
-    const handleProjectCreated = () => {
+    
+    // --- CRUD Handlers ---
+    const handleProjectCreated = useCallback(() => {
         fetchProjects();
         setShowCreateProjectModal(false);
-    };
-
-    const handleOpenEditProjectModal = (project) => {
-        if (!isAdmin) {
-            setError("You do not have permission to edit projects.");
-            return;
-        }
-        setEditingProject(project);
-        setShowEditProjectModal(true);
-    };
-
-    const handleCloseEditProjectModal = () => {
-        setEditingProject(null);
-        setShowEditProjectModal(false);
-    };
+    }, [fetchProjects]);
 
     const handleUpdateProject = async (projectId, projectData) => {
-        if (!isAdmin) {
-            setError("Permission denied: Cannot update project.");
-            throw new Error("Permission denied: Cannot update project.");
-        }
-        setError("");
-        setLoading(true);
         try {
-            const updatedProjectDataFromAPI = await apiFetch(`${API_BASE_PROJECTS}/${projectId}`, {
-                method: "PUT",
-                body: JSON.stringify(projectData),
-            });
+            await api.put(`/projects/${projectId}`, projectData);
             await fetchProjects();
             if (selectedProject?.ProjectID === projectId) {
-                await fetchProjectDetails({ ...selectedProject, ...updatedProjectDataFromAPI });
+                await fetchProjectDetails({ ...selectedProject, ...projectData });
             }
-            handleCloseEditProjectModal();
+            setShowEditProjectModal(false);
         } catch (err) {
-            setError(`Update Project: ${err.message}`);
+            setError(`Update failed: ${err.response?.data?.message || err.message}`);
             throw err;
-        } finally {
-            setLoading(false);
         }
     };
-
+    
     const handleDeleteProject = async (projectId) => {
-        if (!isAdmin) {
-            setError("You do not have permission to delete projects.");
-            return;
-        }
-        if (window.confirm("Are you sure you want to delete this project and all its tasks? This action cannot be undone.")) {
-            setError("");
-            setLoading(true);
+        if (window.confirm("Delete this project and all its tasks? This cannot be undone.")) {
             try {
-                await apiFetch(`${API_BASE_PROJECTS}/${projectId}`, { method: "DELETE" });
-                if (selectedProject?.ProjectID === projectId) {
-                    setSelectedProject(null);
-                }
+                await api.delete(`/projects/${projectId}`);
+                if (selectedProject?.ProjectID === projectId) setSelectedProject(null);
                 await fetchProjects();
             } catch (err) {
-                setError(`Delete Project: ${err.message}`);
-            } finally {
-                setLoading(false);
+                setError(`Delete failed: ${err.response?.data?.message || err.message}`);
             }
         }
     };
 
     const handleCreateTask = async (taskData) => {
-        if (!canCreateTasks) {
-            const errMsg = "You do not have permission to create tasks.";
-            setError(errMsg);
-            throw new Error(errMsg);
-        }
-        if (!selectedProject?.ProjectID) {
-            const errMsg = "No project selected to add the task to.";
-            setError(errMsg);
-            throw new Error(errMsg);
-        }
-        setError("");
-        setTasksLoading(true);
+        if (!selectedProject?.ProjectID) throw new Error("A project must be selected.");
         try {
-            await apiFetch(`${API_BASE_TASKS}/`, {
-                method: "POST",
-                body: JSON.stringify(taskData),
-            });
+            await api.post('/tasks/', { ...taskData, ProjectID: selectedProject.ProjectID });
             await fetchProjectDetails(selectedProject);
             setShowCreateTaskModal(false);
         } catch (err) {
-            console.error("Dashboard: Failed to create task", err, "Data sent:", taskData);
-            setError(`Create Task: ${err.message}`);
+            setError(`Creation failed: ${err.response?.data?.message || err.message}`);
             throw err;
-        } finally {
-            setTasksLoading(false);
+        }
+    };
+
+    const handleUpdateTask = async (taskId, taskData) => {
+        try {
+            await api.put(`/tasks/${taskId}`, taskData);
+            await fetchProjectDetails(selectedProject);
+            setShowEditTaskModal(false);
+        } catch (err) {
+            setError(`Update failed: ${err.response?.data?.message || err.message}`);
+            throw err;
         }
     };
 
     const handleDeleteTask = async (taskId) => {
         if (window.confirm("Are you sure you want to delete this task?")) {
-            setError("");
-            if (!selectedProject) {
-                setError("No project selected. Cannot delete task.");
-                return;
-            }
-            setTasksLoading(true);
             try {
-                await apiFetch(`${API_BASE_TASKS}/${taskId}`, { method: "DELETE" });
+                await api.delete(`/tasks/${taskId}`);
                 await fetchProjectDetails(selectedProject);
             } catch (err) {
-                setError(`Delete Task: ${err.message}`);
-            } finally {
-                setTasksLoading(false);
+                setError(`Delete failed: ${err.response?.data?.message || err.message}`);
             }
+        }
+    };
+    
+    const handleCompleteTask = async (taskId) => {
+        try {
+            await api.post(`/tasks/${taskId}/complete`);
+            await fetchProjectDetails(selectedProject);
+        } catch (err) {
+            setError(`Could not mark task as complete: ${err.response?.data?.message || err.message}`);
         }
     };
 
     const handleUpdateTaskStatus = async (taskId, newStatus) => {
-        setError("");
-        if (!selectedProject) {
-            setError("No project selected. Cannot update task status.");
-            return;
-        }
-        setTasksLoading(true);
         try {
-            await apiFetch(`${API_BASE_TASKS}/${taskId}`, {
-                method: "PUT",
-                body: JSON.stringify({ Status: newStatus }),
-            });
+            await api.put(`/tasks/${taskId}`, { Status: newStatus });
             await fetchProjectDetails(selectedProject);
         } catch (err) {
-            setError(`Update Task Status to ${newStatus}: ${err.message}`);
-            await fetchProjectDetails(selectedProject);
-        } finally {
-            setTasksLoading(false);
+            setError(`Could not update task status: ${err.response?.data?.message || err.message}`);
         }
     };
-
-    const handleCompleteTask = async (taskId) => {
-        await handleUpdateTaskStatus(taskId, "completed");
-    };
-
-    const handleStartEditTask = (task) => {
-        console.log("Starting edit for task:", task);
-        setEditingTask(task);
-        setShowEditTaskModal(true);
-    };
-
-    const handleCloseEditTaskModal = () => {
-        setEditingTask(null);
-        setShowEditTaskModal(false);
-    };
-
-    const handleUpdateTask = async (taskId, taskData) => {
-        setError("");
-        if (!selectedProject) {
-            setError("No project selected. Cannot update task.");
-            throw new Error("No project selected. Cannot update task.");
-        }
-        setTasksLoading(true);
-        try {
-            await apiFetch(`${API_BASE_TASKS}/${taskId}`, {
-                method: "PUT",
-                body: JSON.stringify(taskData),
-            });
-            await fetchProjectDetails(selectedProject); 
-            handleCloseEditTaskModal(); 
-        } catch (err) {
-            setError(`Update Task: ${err.message}`);
-            throw err; 
-        } finally {
-            setTasksLoading(false);
-        }
-    };
-
-    // --- MODIFICATION START: Determine message based on role ---
-    let noProjectSelectedMessage = "Select a project to view its tasks."; // Default message
-    if (isAdmin) {
-        noProjectSelectedMessage = "Select a project to manage its tasks, or create a new project to get started.";
-    } else if (isTaskCreator) {
-        noProjectSelectedMessage = "Select a project to view its tasks. You can add new tasks to the selected project.";
-    }
-    // You can add more 'else if' conditions here for other roles if needed.
-    // For example:
-    // else if (isReadOnlyUser) {
-    //     noProjectSelectedMessage = "Please select a project to see task details.";
-    // }
-    // --- MODIFICATION END ---
 
     return (
         <div className="dashboard-container">
-            <Header />
             <div className="content-area">
                 <div className="sidebar">
                     {user && (
                         <div className="welcome-message-container">
                             <p className="welcome-text">Welcome, <span className="username-text">{user.Username}</span></p>
-                            <p className="role-text">Roles: {Array.isArray(user.roles) ? user.roles.join(", ") : "N/A"}</p>
+                            <p className="role-text">Role: {user.roles?.join(", ")}</p>
                         </div>
                     )}
                     <h2 className="sidebar-title">Projects</h2>
                     {isAdmin && (
-                        <button
-                            onClick={() => setShowCreateProjectModal(true)}
-                            className="project-create-button"
-                            style={{ marginBottom: "1rem", width: "100%" }}
-                        >
+                        <button onClick={() => setShowCreateProjectModal(true)} className="project-create-button">
                             + Create New Project
                         </button>
                     )}
@@ -347,24 +195,20 @@ export default function Dashboard() {
                         loading={loading}
                         selectedProject={selectedProject}
                         onSelect={fetchProjectDetails}
-                        onStartEdit={handleOpenEditProjectModal}
+                        onStartEdit={(project) => { setEditingProject(project); setShowEditProjectModal(true); }}
                         onDelete={handleDeleteProject}
                         isAdmin={isAdmin}
                     />
                 </div>
 
                 <div className="main-content">
-                    {error && <p className="error-message" style={{ color: "red", backgroundColor: "#ffebee", padding: "10px", borderRadius: "4px" }}>{error}</p>}
-
+                    {error && <p className="error-message">{error}</p>}
                     {selectedProject ? (
                         <>
-                            {/* START: Updated Project Details Display */}
                             <div className="project-details-header-compact">
                                 <div className="project-details-line-one">
-                                    <span className="project-name-compact">{selectedProject.ProjectName || "Selected Project"}</span>
-                                    {selectedProject.Description && (
-                                        <span className="project-description-compact"> - {selectedProject.Description}</span>
-                                    )}
+                                    <span className="project-name-compact">{selectedProject.ProjectName}</span>
+                                    {selectedProject.Description && <span className="project-description-compact"> - {selectedProject.Description}</span>}
                                 </div>
                                 <div className="project-details-line-two">
                                     <span>Owner: {selectedProject.OwnerUsername || 'N/A'}</span>
@@ -374,91 +218,57 @@ export default function Dashboard() {
                                     <span>End: {selectedProject.EndDate ? new Date(selectedProject.EndDate).toLocaleDateString() : "N/A"}</span>
                                 </div>
                             </div>
-                            {/* END: Updated Project Details Display */}
-
-                            <div style={{ marginTop: "1.5rem", /* Previous styling for tasks header */ }}>
-                                <div style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center"
-                                }}>
-                                    <h2 style={{ margin: 0 }}>
-                                        Tasks
-                                    </h2>
-                                    {canCreateTasks && (
-                                        <button
-                                            className="task-create-button"
-                                            onClick={() => setShowCreateTaskModal(true)}
-                                            disabled={!selectedProject?.ProjectID}
-                                        >
-                                            + Add New Task
-                                        </button>
-                                    )}
-                                </div>
+                            <div className="tasks-header">
+                                <h2>Tasks</h2>
+                                {canCreateTasks && <button onClick={() => setShowCreateTaskModal(true)} className="task-create-button">+ Add New Task</button>}
                             </div>
                             <TaskTable
                                 selectedProject={selectedProject}
                                 tasksLoading={tasksLoading}
+                                onStartEditTask={(task) => { setEditingTask(task); setShowEditTaskModal(true); }}
                                 handleCompleteTask={handleCompleteTask}
                                 handleDeleteTask={handleDeleteTask}
                                 handleUpdateTaskStatus={handleUpdateTaskStatus}
-                                onStartEditTask={handleStartEditTask}
+                                currentUser={user}
                             />
-                            
                         </>
                     ) : (
-                        // --- MODIFICATION START: Use the dynamic message ---
-                        !loading && <div className="info-container">
-                        <img src="./project.png" alt="No project selected" className="info-image" /> 
-                        <p className="info-message">{noProjectSelectedMessage}</p>
-                      </div>
-                      // --- MODIFICATION END ---
-                  
+                        <div className="info-container">
+                            <p className="info-message">{loading ? "Loading projects..." : "Select a project to begin."}</p>
+                        </div>
                     )}
-                    {loading && !selectedProject && <p className="info-message">Loading projects...</p>}
                 </div>
             </div>
 
-            {isAdmin && showCreateProjectModal && (
-                <CreateProjectModal
-                    isOpen={showCreateProjectModal}
-                    onClose={() => setShowCreateProjectModal(false)}
-                    currentUserId={user?.UserID}
-                    onCreate={handleProjectCreated}
-                />
-            )}
-
-            {canCreateTasks && showCreateTaskModal && ( //
-                <CreateTaskModal
-                    isOpen={showCreateTaskModal}
-                    onClose={() => setShowCreateTaskModal(false)}
-                    onSubmit={handleCreateTask}
-                    projectId={selectedProject?.ProjectID}
-                    currentUser={user}
-                    users={readOnlyUsersForTaskAssignment}  //
-                />
-            )}
-
-            {isAdmin && editingProject && (
-                <EditProjectModal
-                    isOpen={showEditProjectModal}
-                    onClose={handleCloseEditProjectModal}
-                    project={editingProject}
-                    onUpdate={handleUpdateProject}
-                    users={projectOwnerOptionsForEditModal} //
-                />
-            )}
-
-            {showEditTaskModal && editingTask && (
-                <EditTaskModal
-                    isOpen={showEditTaskModal}
-                    onClose={handleCloseEditTaskModal}
-                    task={editingTask}
-                    onUpdate={handleUpdateTask}
-                    users={readOnlyUsersForTaskAssignment}  //
-                    currentProject={selectedProject}
-                />
-            )}
+            {/* Modals */}
+            <CreateProjectModal 
+                isOpen={showCreateProjectModal} 
+                onClose={() => setShowCreateProjectModal(false)} 
+                onCreate={handleProjectCreated}
+                users={allUsers}
+            />
+            <CreateTaskModal 
+                isOpen={showCreateTaskModal} 
+                onClose={() => setShowCreateTaskModal(false)} 
+                onSubmit={handleCreateTask} 
+                projectId={selectedProject?.ProjectID}
+                users={assignableUsers}
+            />
+            <EditProjectModal 
+                isOpen={showEditProjectModal} 
+                onClose={() => setShowEditProjectModal(false)} 
+                project={editingProject} 
+                onUpdate={handleUpdateProject} 
+                users={allUsers}
+            />
+            <EditTaskModal 
+                isOpen={showEditTaskModal} 
+                onClose={() => setShowEditTaskModal(false)} 
+                task={editingTask} 
+                onUpdate={handleUpdateTask} 
+                users={assignableUsers}
+                currentProject={selectedProject}
+            />
         </div>
     );
 }
