@@ -1,24 +1,30 @@
 # auth.py
-from authlib.integrations.flask_client import OAuth
-from flask import current_app as app # To access app.config
 
+from authlib.integrations.flask_client import OAuth
+from flask import current_app
+
+# Initialize the OAuth registry
 oauth = OAuth()
 
 def init_oauth(current_flask_app):
-    """Initializes OAuth providers."""
-    # Make sure to call this function from your app factory (create_app in app.py)
-    # Example: auth.init_oauth(app)
-
-    # Check if already initialized to prevent re-registering
+    """
+    Initializes the OAuth client with providers like Google.
+    This function is called from the application factory (create_app).
+    """
+    # Check if 'google' client is already registered to avoid duplication
     if 'google' not in oauth._clients:
         oauth.register(
             name='google',
-            client_id=current_flask_app.config.get('GOOGLE_CLIENT_ID') or ('8701416899-ca78l8pqbem0b2jfa2votu3tl02ai48j.apps.googleusercontent.com'),
-            client_secret=current_flask_app.config.get('GOOGLE_CLIENT_SECRET') or ('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'),
-            server_metadata_url='https://accounts.google.com/.well-known/openid-configuration', # OpenID Connect discovery
+            # It's best practice to load secrets from the environment/config
+            client_id=current_flask_app.config.get('GOOGLE_CLIENT_ID'),
+            client_secret=current_flask_app.config.get('GOOGLE_CLIENT_SECRET'),
+            # The server_metadata_url automatically fetches the correct endpoints for authorization and tokens
+            server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
             client_kwargs={
-                'scope': 'openid email profile' # Scopes you want to request
+                # 'scope' defines what information the application is requesting from Google
+                'scope': 'openid email profile'
             }
         )
+    
+    # Initialize the client with the Flask app instance
     oauth.init_app(current_flask_app)
-

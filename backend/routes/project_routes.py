@@ -1,12 +1,13 @@
-from flask import Blueprint, request, jsonify, current_app as app
-from models import db, Project, User # Make sure Task model is available if you need more complex task serialization
+from flask import Blueprint, request, jsonify, current_app
+from models import db, Project, User, Task
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
-from utils import role_required, get_current_user_from_session # Ensure role_required is correctly implemented
+from utils import jwt_required, role_required
 
 project_routes = Blueprint('project_routes', __name__)
 
 # --- Helper Functions ---
+
 def parse_date_string_to_date_obj(date_string, field_name="date"):
     """
     Parses a date string in YYYY-MM-DD format to a date object.
@@ -53,13 +54,16 @@ def serialize_project(project, include_tasks=False):
         project_data["tasks"] = [serialize_task_simple(t) for t in project.tasks] 
     return project_data
 
-# --- Project Routes ---
+# --- Project Routes (Updated with JWT) ---
 
 @project_routes.route('/', methods=['POST'])
-@role_required('admin') # Only admins can create projects
-def create_project():
-    current_user = get_current_user_from_session()
-
+@jwt_required
+@role_required('admin')
+def create_project(current_user):
+    """
+    Creates a new project. Only accessible by admins.
+    The `current_user` object is injected by the @jwt_required decorator.
+    """
     data = request.json
     if not data:
         return jsonify({"message": "No input data"}), 400
@@ -68,20 +72,18 @@ def create_project():
     if not project_name:
         return jsonify({"message": "ProjectName is required"}), 400
 
+    # Default to the authenticated user if OwnerUserID is not provided
     owner_user_id = data.get('OwnerUserID', current_user.UserID)
-    if owner_user_id:
-        if not User.query.get(owner_user_id):
-            return jsonify({"message": f"Owner user ID {owner_user_id} not found."}), 404
-    else: 
-        return jsonify({"message": "OwnerUserID is required."}), 400
-
+    
+    if not User.query.get(owner_user_id):
+        return jsonify({"message": f"Owner user ID {owner_user_id} not found."}), 404
 
     try:
         start_date_str = data.get('StartDate')
         end_date_str = data.get('EndDate')
         
-        start_date = parse_date_string_to_date_obj(start_date_str, 'StartDate') if start_date_str else None
-        end_date = parse_date_string_to_date_obj(end_date_str, 'EndDate') if end_date_str else None
+        start_date = parse_date_string_to_date_obj(start_date_str, 'StartDate')
+        end_date = parse_date_string_to_date_obj(end_date_str, 'EndDate')
 
         if start_date and end_date and start_date > end_date:
             return jsonify({"message": "StartDate cannot be after EndDate."}), 400
@@ -101,19 +103,16 @@ def create_project():
         return jsonify({"message": str(ve)}), 400
     except IntegrityError as e:
         db.session.rollback()
-        return jsonify({"message": "Database integrity error. Project name might already exist or invalid foreign key.", "error_detail": str(e.orig)}), 400
+        return jsonify({"message": "Database integrity error. Project name might already exist.", "error_detail": str(e.orig)}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Unexpected error creating project.", "error": str(e)}), 500
 
 
 @project_routes.route('/', methods=['GET'])
-def list_projects():
-    
-    current_user = get_current_user_from_session()
-    if not current_user:
-        return jsonify({"message": "Authentication required"}), 401
-        
+@jwt_required
+def list_projects(current_user):
+    """Lists all projects. Requires any valid JWT."""
     try:
         projects = Project.query.order_by(Project.ProjectName).all()
         return jsonify([serialize_project(p, include_tasks=False) for p in projects]), 200
@@ -121,20 +120,19 @@ def list_projects():
         return jsonify({"message": "Failed to retrieve projects.", "error": str(e)}), 500
 
 @project_routes.route('/<int:project_id>', methods=['GET'])
-def get_project(project_id):
-    current_user = get_current_user_from_session()
-    if not current_user:
-        return jsonify({"message": "Authentication required"}), 401
-
+@jwt_required
+def get_project(current_user, project_id):
+    """Gets a single project by its ID. Requires any valid JWT."""
     project = Project.query.get_or_404(project_id, description=f"Project ID {project_id} not found.")
-    return jsonify(serialize_project(project, include_tasks=True)), 200 # Include tasks for detail view
+    return jsonify(serialize_project(project, include_tasks=True)), 200
 
 @project_routes.route('/<int:project_id>', methods=['PUT'])
+@jwt_required
 @role_required('admin') 
-def update_project(project_id):
+def update_project(current_user, project_id):
+    """Updates a project. Only accessible by admins."""
     project = Project.query.get_or_404(project_id, description=f"Project ID {project_id} not found.")
-    current_user = get_current_user_from_session() 
-
+    
     data = request.json
     if not data:
         return jsonify({"message": "No input data for update"}), 400
@@ -154,18 +152,14 @@ def update_project(project_id):
             project.EndDate = parse_date_string_to_date_obj(data.get('EndDate'), 'EndDate')
             updated_fields.append('EndDate')
 
-        # Validate dates after attempting to parse both
         if project.StartDate and project.EndDate and project.StartDate > project.EndDate:
             return jsonify({"message": "StartDate cannot be after EndDate."}), 400
 
         if 'OwnerUserID' in data:
             owner_user_id = data.get('OwnerUserID')
-            if owner_user_id: 
-                if not User.query.get(owner_user_id):
-                    return jsonify({"message": f"New owner user ID {owner_user_id} not found."}), 404
-                project.OwnerUserID = owner_user_id
-            else: 
-                project.OwnerUserID = None 
+            if not User.query.get(owner_user_id):
+                return jsonify({"message": f"New owner user ID {owner_user_id} not found."}), 404
+            project.OwnerUserID = owner_user_id
             updated_fields.append('OwnerUserID')
 
         if not updated_fields:
@@ -177,28 +171,27 @@ def update_project(project_id):
         return jsonify({"message": str(ve)}), 400
     except IntegrityError as e:
         db.session.rollback()
-        return jsonify({"message": "Database integrity error. Project name might already exist or invalid foreign key.", "error_detail": str(e.orig)}), 400
+        return jsonify({"message": "Database integrity error. Project name might already exist.", "error_detail": str(e.orig)}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Unexpected error updating project.", "error": str(e)}), 500
 
 @project_routes.route('/<int:project_id>', methods=['DELETE'])
-@role_required('admin') # Only admins can delete projects
-def delete_project(project_id):
+@jwt_required
+@role_required('admin')
+def delete_project(current_user, project_id):
+    """Deletes a project. Only accessible by admins."""
     project = Project.query.get_or_404(project_id, description=f"Project ID {project_id} not found.")
-    current_user = get_current_user_from_session() # For logging
+    
     try:
-        # Assuming 'ondelete=CASCADE' is set on the Task.ProjectID ForeignKey for tasks
-        # If not, tasks associated with this project might need to be handled manually or will raise an error
+        # Assuming 'ondelete=CASCADE' is set on the Task.ProjectID ForeignKey
         db.session.delete(project)
         db.session.commit()
         
         return jsonify({"message": "Project and its associated tasks deleted successfully"}), 200
-    except Exception as e: # Catch broad exceptions, could be FK constraint if cascade isn't set
+    except IntegrityError as e:
         db.session.rollback()
-        
-        # Check if it's an integrity error related to foreign key constraints
-        if isinstance(e, IntegrityError):
-             return jsonify({"message": "Could not delete project due to existing related data (e.g., tasks). Ensure cascading deletes are configured or remove related data first.", "error": str(e.orig)}), 400
+        return jsonify({"message": "Could not delete project due to existing related data (e.g., tasks).", "error": str(e.orig)}), 400
+    except Exception as e:
+        db.session.rollback()
         return jsonify({"message": "Unexpected error deleting project.", "error": str(e)}), 500
-
