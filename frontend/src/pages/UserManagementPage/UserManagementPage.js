@@ -40,7 +40,7 @@ const UserManagementPage = () => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await api.get('/users/'); 
+      const response = await api.get('/api/v1/users/'); 
       setUsers(response.data || []);
     } catch (err) {
       setError(`Failed to fetch users: ${err.response?.data?.message || err.message}`);
@@ -53,7 +53,7 @@ const UserManagementPage = () => {
   const fetchAllSystemRoles = useCallback(async () => {
     if (!isAdmin) return;
     try {
-      const response = await api.get('/users/roles'); 
+      const response = await api.get('/api/v1/users/roles'); 
       setAllSystemRoles(response.data || []);
     } catch (err) {
       setError(prevError => `${prevError} Failed to fetch roles: ${err.response?.data?.message || err.message}`.trim());
@@ -73,7 +73,7 @@ const UserManagementPage = () => {
     setIsSubmitting(true);
     setError('');
     try {
-      await api.post('/users/', userData);
+      await api.post('/api/v1/users/', userData);
       setShowCreateModal(false);
       fetchUsers(); 
     } catch (err) {
@@ -94,7 +94,7 @@ const UserManagementPage = () => {
     setIsSubmitting(true);
     setError('');
     try {
-      await api.put(`/users/${userId}`, userData);
+      await api.put(`/api/v1/users/${userId}`, userData);
       setShowEditModal(false);
       setUserToEdit(null);
       fetchUsers(); 
@@ -115,7 +115,7 @@ const UserManagementPage = () => {
       setIsLoading(true); 
       setError('');
       try {
-        await api.delete(`/users/${userId}`);
+        await api.delete(`/api/v1/users/${userId}`);
         fetchUsers(); 
       } catch (err) {
         setError(`Failed to delete user: ${err.response?.data?.message || err.message}`);

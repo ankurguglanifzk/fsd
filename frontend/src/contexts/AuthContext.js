@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('access_token');
     if (token) {
       try {
-        const response = await api.get('/users/me');
+        const response = await api.get('/api/v1/users/me');
         setUser(response.data);
       } catch (error) {
         console.error("Session check failed, token might be expired.", error);
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   const login = useCallback(async (username, password) => {
     setAuthLoading(true);
     try {
-      const response = await api.post('/users/login', { Username: username, Password: password });
+      const response = await api.post('/api/v1/users/login', { Username: username, Password: password });
       const { access_token, user: userData } = response.data;
 
       if (access_token && userData) {

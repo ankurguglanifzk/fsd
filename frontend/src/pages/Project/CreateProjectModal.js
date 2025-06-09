@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
-// Assuming you have some CSS for modal-overlay, modal-content etc.
-// import './CreateProjectModal.css';
+import React, { useState } from "react";
+import api from "../../api"; // Using the centralized api instance
 
 // Add 'onCreate' to the props
-export default function CreateProjectModal({ isOpen, onClose, currentUserId, onCreate }) {
-  const [projectName, setProjectName] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [error, setError] = useState('');
+export default function CreateProjectModal({
+  isOpen,
+  onClose,
+  currentUserId,
+  onCreate,
+}) {
+  const [projectName, setProjectName] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -16,31 +20,26 @@ export default function CreateProjectModal({ isOpen, onClose, currentUserId, onC
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
+    // --- Start Validation ---
     if (!projectName.trim()) {
-      setError('Project name is required');
+      setError("Project name is required");
       return;
     }
-    // --- MODIFIED: Added check for Description ---
     if (!description.trim()) {
-        setError('Description is required');
-        return;
-    }
-    // --- END MODIFICATION ---
-    if (!startDate || !endDate) {
-      setError('Start and end dates are required');
+      setError("Description is required");
       return;
     }
-    if (isNaN(Date.parse(startDate)) || isNaN(Date.parse(endDate))) {
-      setError('Invalid date format');
+    if (!startDate || !endDate) {
+      setError("Start and end dates are required");
       return;
     }
     if (new Date(startDate) > new Date(endDate)) {
-      setError('Start date cannot be after end date');
+      setError("Start date cannot be after end date");
       return;
     }
+    // --- End Validation ---
 
-    setError('');
+    setError("");
     setLoading(true);
 
     const projectData = {
@@ -52,39 +51,35 @@ export default function CreateProjectModal({ isOpen, onClose, currentUserId, onC
     };
 
     try {
-      const jsonBody = JSON.stringify(projectData);
-      console.log('Sending project data:', jsonBody);
+      console.log("Sending project data:", projectData);
 
-      const response = await fetch('http://localhost:5000/api/v1/projects/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Correctly included!
-        body: jsonBody,
-      });
+      // --- MODIFICATION: Use the 'api' instance instead of 'fetch' ---
+      // This ensures the Axios request interceptor attaches the auth token.
+      const response = await api.post('/api/v1/projects/', projectData);
 
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message || 'Project creation failed');
-      }
-
-      console.log('Project created:', result);
+      // With Axios, the response data is in the 'data' property.
+      const result = response.data; 
       
+      console.log("Project created:", result);
+
       if (onCreate) {
-        onCreate(); // Call the refresh function passed from Dashboard
+        onCreate(); // Call the refresh function passed from the parent component
       }
 
       onClose(); // Close modal after success
 
       // Reset form
-      setProjectName('');
-      setDescription('');
-      setStartDate('');
-      setEndDate('');
+      setProjectName("");
+      setDescription("");
+      setStartDate("");
+      setEndDate("");
+
     } catch (err) {
-      console.error('Error creating project:', err);
-      setError(err.message);
+      console.error("Error creating project:", err);
+      // Axios provides more detailed error objects. We can get the server's
+      // error message from err.response.data.message if it exists.
+      const errorMessage = err.response?.data?.message || err.message || "Project creation failed";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -94,10 +89,10 @@ export default function CreateProjectModal({ isOpen, onClose, currentUserId, onC
     <div className="modal-overlay">
       <div className="modal-content">
         <h3>Create New Project</h3>
-        {error && <p className="error-message">{error}</p>}
+        {error && <p className="error-message" style={{ color: 'red' }}>{error}</p>}
         <form onSubmit={handleSubmit}>
           {/* Project Name Input */}
-          <div className="form-group"> {/* Added for structure */}
+          <div className="form-group">
             <label htmlFor="projectName">Project Name:</label>
             <input
               id="projectName"
@@ -116,7 +111,7 @@ export default function CreateProjectModal({ isOpen, onClose, currentUserId, onC
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              required // --- MODIFIED: Added required attribute ---
+              required
             />
           </div>
 
@@ -145,10 +140,16 @@ export default function CreateProjectModal({ isOpen, onClose, currentUserId, onC
           </div>
 
           <div className="modal-actions">
-            <button type="submit" disabled={loading} className="button-primary"> {/* Added class */}
-              {loading ? 'Creating...' : 'Create Project'}
+            <button type="submit" disabled={loading} className="button-primary">
+              {loading ? "Creating..." : "Create Project"}
             </button>
-            <button type="button" onClick={onClose} className="button-secondary">Cancel</button> {/* Added class */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="button-secondary"
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>

@@ -43,7 +43,7 @@ export default function Dashboard() {
         setLoading(true);
         setError("");
         try {
-            const response = await api.get('/projects/');
+            const response = await api.get('/api/v1/projects/');
             setProjects(response.data);
         } catch (err) {
             setError(`Failed to load projects: ${err.response?.data?.message || err.message}`);
@@ -56,7 +56,7 @@ export default function Dashboard() {
         if (!canCreateTasks) return; 
 
         try {
-            const response = await api.get('/users/');
+            const response = await api.get('/api/v1/users/');
             setAllUsers(response.data);
         } catch (err) {
             setError(`Failed to load user list: ${err.response?.data?.message || err.message}`);
@@ -72,7 +72,7 @@ export default function Dashboard() {
         setError("");
         setSelectedProject(prev => ({ ...prev, ...project, tasks: [] }));
         try {
-            const response = await api.get(`/projects/${project.ProjectID}`);
+            const response = await api.get(`/api/v1/projects/${project.ProjectID}`);
             setSelectedProject(response.data);
         } catch (err) {
             setError(`Failed to load details for ${project.ProjectName}: ${err.response?.data?.message || err.message}`);
@@ -98,7 +98,7 @@ export default function Dashboard() {
 
     const handleUpdateProject = async (projectId, projectData) => {
         try {
-            await api.put(`/projects/${projectId}`, projectData);
+            await api.put(`/api/v1/projects/${projectId}`, projectData);
             await fetchProjects();
             if (selectedProject?.ProjectID === projectId) {
                 await fetchProjectDetails({ ...selectedProject, ...projectData });
@@ -113,7 +113,7 @@ export default function Dashboard() {
     const handleDeleteProject = async (projectId) => {
         if (window.confirm("Delete this project and all its tasks? This cannot be undone.")) {
             try {
-                await api.delete(`/projects/${projectId}`);
+                await api.delete(`/api/v1/projects/${projectId}`);
                 if (selectedProject?.ProjectID === projectId) setSelectedProject(null);
                 await fetchProjects();
             } catch (err) {
@@ -125,7 +125,7 @@ export default function Dashboard() {
     const handleCreateTask = async (taskData) => {
         if (!selectedProject?.ProjectID) throw new Error("A project must be selected.");
         try {
-            await api.post('/tasks/', { ...taskData, ProjectID: selectedProject.ProjectID });
+            await api.post('/api/v1/tasks/', { ...taskData, ProjectID: selectedProject.ProjectID });
             await fetchProjectDetails(selectedProject);
             setShowCreateTaskModal(false);
         } catch (err) {
@@ -136,7 +136,7 @@ export default function Dashboard() {
 
     const handleUpdateTask = async (taskId, taskData) => {
         try {
-            await api.put(`/tasks/${taskId}`, taskData);
+            await api.put(`/api/v1/tasks/${taskId}`, taskData);
             await fetchProjectDetails(selectedProject);
             setShowEditTaskModal(false);
         } catch (err) {
@@ -148,7 +148,7 @@ export default function Dashboard() {
     const handleDeleteTask = async (taskId) => {
         if (window.confirm("Are you sure you want to delete this task?")) {
             try {
-                await api.delete(`/tasks/${taskId}`);
+                await api.delete(`/api/v1/tasks/${taskId}`);
                 await fetchProjectDetails(selectedProject);
             } catch (err) {
                 setError(`Delete failed: ${err.response?.data?.message || err.message}`);
@@ -158,7 +158,7 @@ export default function Dashboard() {
     
     const handleCompleteTask = async (taskId) => {
         try {
-            await api.post(`/tasks/${taskId}/complete`);
+            await api.post(`/api/v1/tasks/${taskId}/complete`);
             await fetchProjectDetails(selectedProject);
         } catch (err) {
             setError(`Could not mark task as complete: ${err.response?.data?.message || err.message}`);
@@ -167,7 +167,7 @@ export default function Dashboard() {
 
     const handleUpdateTaskStatus = async (taskId, newStatus) => {
         try {
-            await api.put(`/tasks/${taskId}`, { Status: newStatus });
+            await api.put(`/api/v1/tasks/${taskId}`, { Status: newStatus });
             await fetchProjectDetails(selectedProject);
         } catch (err) {
             setError(`Could not update task status: ${err.response?.data?.message || err.message}`);
