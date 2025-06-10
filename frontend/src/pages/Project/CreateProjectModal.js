@@ -55,7 +55,7 @@ export default function CreateProjectModal({
 
       // --- MODIFICATION: Use the 'api' instance instead of 'fetch' ---
       // This ensures the Axios request interceptor attaches the auth token.
-      const response = await api.post('/api/v1/projects/', projectData);
+      const response = await api.post('/projects/', projectData);
 
       // With Axios, the response data is in the 'data' property.
       const result = response.data; 

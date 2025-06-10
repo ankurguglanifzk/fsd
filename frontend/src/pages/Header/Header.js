@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom'; // Added Link
 import './Header.css';
 import { useAuth } from '../../contexts/AuthContext';
-import api from '../../api';
+
 // SVG Logout Icon Component
 const LogoutIcon = ({ className }) => (
   <svg
@@ -43,7 +43,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/v1/users/logout`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users/logout`, {
         method: 'POST',
         credentials: 'include',
       });
