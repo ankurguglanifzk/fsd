@@ -1,13 +1,17 @@
 # routes/user_routes.py
 
-from flask import Blueprint, request, jsonify, redirect, url_for
+from flask import Blueprint, request, jsonify
 from models import db, User, Role, UserRole
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import IntegrityError
-# MODIFIED: Import JWT functions and remove session-based user retrieval
 from utils import jwt_required, role_required, create_access_token
-from auth import oauth
 import os
+
+# --- CORRECTED IMPORTS ---
+# These are required to verify the Google ID token
+from google.oauth2 import id_token
+from google.auth.transport import requests as grequests
+# The 'from auth import oauth' line has been removed as it's for the old flow
 
 user_routes = Blueprint('user_routes', __name__)
 
@@ -34,7 +38,6 @@ def login():
     if not user.IsActive:
         return jsonify({'message': 'User account is inactive'}), 401
 
-    # MODIFIED: Generate JWT instead of using sessions
     identity_data = {
         "user_id": user.UserID,
         "username": user.Username,
@@ -57,57 +60,50 @@ def login():
         'access_token': access_token
     }), 200
 
-@user_routes.route('/login/google')
-def login_google():
-    redirect_uri = url_for('user_routes.google_callback', _external=True)
-    return oauth.google.authorize_redirect(redirect_uri)
+@user_routes.route('/google/verify-token', methods=['POST'])
+def verify_google_token():
+    """
+    Receives a Google ID token from the frontend, verifies it,
+    and returns an application-specific access token.
+    """
+    data = request.get_json()
+    token = data.get('token')
+    if not token:
+        return jsonify({'message': 'No token provided'}), 400
 
-def get_predefined_role(role_name):
-    """Fetch a Role object by RoleName from the DB."""
+    google_client_id = os.environ.get('GOOGLE_CLIENT_ID') 
+    if not google_client_id:
+        return jsonify({'message': 'Server configuration error: GOOGLE_CLIENT_ID not set'}), 500
+
     try:
-        return Role.query.filter_by(RoleName=role_name).first()
-    except Exception:
-        return None
+        # Verify the token with Google
+        idinfo = id_token.verify_oauth2_token(token, grequests.Request(), google_client_id)
+        
+        email = idinfo['email']
+        domain = email.split('@')[-1]
 
-@user_routes.route('/google/callback')
-def google_callback():
-    try:
-        token = oauth.google.authorize_access_token()
-        user_info_response = oauth.google.get('https://openidconnect.googleapis.com/v1/userinfo')
-        user_info_response.raise_for_status()
-        user_info = user_info_response.json()
-    except Exception as e:
-        return redirect(f"http://localhost:3000/login?error=google_auth_failed&message={str(e)}")
+        if domain.lower() != "tigeranalytics.com":
+            return jsonify({'message': 'Login with this Google account domain is not allowed.'}), 403
 
-    if not user_info or 'email' not in user_info:
-        return redirect("http://localhost:3000/login?error=google_user_info_failed")
+        user = User.query.filter_by(Email=email).first()
 
-    email = user_info['email']
-    domain = email.split('@')[-1]
-
-    if domain.lower() != "tigeranalytics.com":
-        return redirect("http://localhost:3000/login?error=unauthorized_domain")
-
-    user = User.query.filter_by(Email=email).first()
-
-    if not user:
-        default_role = get_predefined_role('read_only_user')
-        if not default_role:
-            return redirect("http://localhost:3000/login?error=default_role_missing")
-
-        try:
+        if not user:
+            default_role = Role.query.filter_by(RoleName='read_only_user').first()
+            if not default_role:
+                 return jsonify({'message': 'System configuration error: Default role missing'}), 500
+            
             username_candidate = email.split('@')[0]
             temp_username = username_candidate
             counter = 1
             while User.query.filter_by(Username=temp_username).first():
                 temp_username = f"{username_candidate}{counter}"
                 counter += 1
-            
+
             user = User(
                 Username=temp_username,
                 Email=email,
-                FullName=user_info.get('name'),
-                PasswordHash=generate_password_hash(os.urandom(16))
+                FullName=idinfo.get('name'),
+                PasswordHash=generate_password_hash(os.urandom(16).hex())
             )
             db.session.add(user)
             db.session.flush()
@@ -115,34 +111,45 @@ def google_callback():
             user_role = UserRole(UserID=user.UserID, RoleID=default_role.RoleID)
             db.session.add(user_role)
             db.session.commit()
-        except Exception:
-            db.session.rollback()
-            return redirect("http://localhost:3000/login?error=user_creation_failed")
 
-    if not user.IsActive:
-        return redirect("http://localhost:3000/login?error=inactive_user")
+        if not user.IsActive:
+            return jsonify({'message': 'User account is inactive'}), 401
+        
+        identity_data = {
+            "user_id": user.UserID,
+            "username": user.Username,
+            "roles": [role.RoleName for role in user.roles]
+        }
+        access_token = create_access_token(identity_data=identity_data)
+        
+        user_data = {
+            'UserID': user.UserID,
+            'Username': user.Username,
+            'FullName': user.FullName,
+            'Email': user.Email,
+            'IsActive': user.IsActive,
+            'roles': [role.RoleName for role in user.roles]
+        }
 
-    # MODIFIED: Generate JWT and redirect to a frontend callback route with the token
-    identity_data = {
-        "user_id": user.UserID,
-        "username": user.Username,
-        "roles": [role.RoleName for role in user.roles]
-    }
-    access_token = create_access_token(identity_data=identity_data)
-    
-    # Redirect to a route on your frontend that can handle the token
-    return redirect(f"http://localhost:3000/auth/callback?token={access_token}")
+        return jsonify({
+            'message': 'Google login successful',
+            'access_token': access_token,
+            'user': user_data
+        }), 200
+
+    except ValueError:
+        return jsonify({'message': 'Invalid Google token'}), 401
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'An unexpected server error occurred.', "error": str(e)}), 500
 
 @user_routes.route('/logout', methods=['POST'])
 def logout():
-    # For JWT, logout is primarily a client-side action (deleting the token).
-    # This endpoint can be used for blocklisting tokens if implemented.
     return jsonify({'message': 'Logout successful. Please clear the token on the client-side.'}), 200
 
 @user_routes.route('/me', methods=['GET'])
-@jwt_required  # MODIFIED: Protect with JWT
+@jwt_required
 def get_current_user_info(current_user):
-    # MODIFIED: The user object is now injected by the @jwt_required decorator
     user = current_user
     if not user:
         return jsonify({'message': 'User not found.'}), 404
@@ -157,12 +164,11 @@ def get_current_user_info(current_user):
         'roles': [role.RoleName for role in user.roles]
     }), 200
 
-# --- User Management (CRUD - MODIFIED to use JWT) ---
+# --- User Management (CRUD) ---
 @user_routes.route('/', methods=['POST'])
-@jwt_required  # NEW: Add JWT protection
+@jwt_required
 @role_required('admin')
 def create_user(current_user):
-    # ... function logic remains the same ...
     data = request.json
     if not data:
         return jsonify({"message": "No input data provided"}), 400
@@ -212,9 +218,8 @@ def create_user(current_user):
         return jsonify({"message": "An unexpected error occurred while creating the user.", "error": str(e)}), 500
 
 @user_routes.route('/', methods=['GET'])
-@jwt_required # NEW: Add JWT protection for listing users
+@jwt_required
 def list_users(current_user):
-    # ... function logic remains the same ...
     try:
         users = User.query.all()
         users_data = []
@@ -230,10 +235,9 @@ def list_users(current_user):
         return jsonify({"message": "Failed to retrieve users.", "error": str(e)}), 500
 
 @user_routes.route('/<int:user_id>', methods=['GET'])
-@jwt_required  # NEW: Add JWT protection
+@jwt_required
 @role_required('admin')
 def get_user(current_user, user_id):
-    # ... function logic remains the same ...
     user = User.query.get_or_404(user_id)
     roles = [{"RoleID": r.RoleID, "RoleName": r.RoleName} for r in user.roles]
     return jsonify({
@@ -243,10 +247,9 @@ def get_user(current_user, user_id):
     }), 200
 
 @user_routes.route('/<int:user_id>', methods=['PUT'])
-@jwt_required  # NEW: Add JWT protection
+@jwt_required
 @role_required('admin')
 def update_user(current_user, user_id):
-    # ... function logic remains the same ...
     user = User.query.get_or_404(user_id)
     data = request.json
     if not data:
@@ -277,10 +280,9 @@ def update_user(current_user, user_id):
         return jsonify({"message": "An unexpected error occurred.", "error": str(e)}), 500
 
 @user_routes.route('/<int:user_id>', methods=['DELETE'])
-@jwt_required  # NEW: Add JWT protection
+@jwt_required
 @role_required('admin')
 def delete_user(current_user, user_id):
-    # ... function logic remains the same ...
     user = User.query.get_or_404(user_id)
     try:
         db.session.delete(user)
@@ -291,9 +293,8 @@ def delete_user(current_user, user_id):
         return jsonify({"message": "Unexpected error.", "error": str(e)}), 500
 
 @user_routes.route('/roles', methods=['GET'])
-@jwt_required # NEW: Add JWT protection
+@jwt_required
 def list_all_system_roles(current_user):
-    # ... function logic remains the same ...
     try:
         roles = Role.query.all()
         return jsonify([{"RoleID": r.RoleID, "RoleName": r.RoleName, "Description": r.Description} for r in roles]), 200

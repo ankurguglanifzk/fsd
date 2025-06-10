@@ -25,7 +25,7 @@ def create_app(config_class=Config):
     # Configure CORS to allow credentials and the Authorization header for JWT
     CORS(
         app,
-        resources={r"/api/v1/*": {"origins": ["http://localhost:3000", "http://tasktrackjune.s3-website.ap-south-1.amazonaws.com", "http://tasktrack4june.s3-website-ap-southeast-2.amazonaws.com"]}},
+        resources={r"/api/v1/*": {"origins": ["http://localhost:3000",  "http://tasktrack4june.s3-website-ap-southeast-2.amazonaws.com"]}},
         supports_credentials=True,
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept"]
