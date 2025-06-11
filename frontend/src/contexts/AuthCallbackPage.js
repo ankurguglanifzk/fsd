@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from './AuthContext'; // Ensure path is correct
+import { useAuth } from './AuthContext'; 
 
 /**
- * This component's sole purpose is to handle the redirect from the OAuth provider.
+ * Sole purpose is to handle the redirect from the OAuth provider.
  * It grabs the token from the URL, stores it, and then redirects to the dashboard.
  */
 const AuthCallbackPage = () => {

@@ -1,6 +1,6 @@
 // src/contexts/AuthContext.js
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import api from '../api'; // Import the configured Axios instance
+import api from '../api'; 
 
 const AuthContext = createContext(null);
 
@@ -48,7 +48,6 @@ export const AuthProvider = ({ children }) => {
         }
     }, []);
 
-    // --- MODIFIED FUNCTION ---
     const googleLogin = useCallback(async (googleToken) => {
         setAuthLoading(true);
         try {
@@ -60,8 +59,6 @@ export const AuthProvider = ({ children }) => {
                 setUser(userData);
                 return { success: true };
             }
-            // This is the crucial change: handle cases where the server response is 200 OK
-            // but the expected data (token, user) is missing.
             console.error("Google login succeeded but server response was incomplete.");
             return { success: false, message: "Login failed: Incomplete server response." };
         } catch (error) {
@@ -75,8 +72,6 @@ export const AuthProvider = ({ children }) => {
     const logout = useCallback(() => {
         setUser(null);
         localStorage.removeItem('access_token');
-        // Optionally, redirect to login page after logout
-        // window.location.href = '/login';
     }, []);
 
     return (

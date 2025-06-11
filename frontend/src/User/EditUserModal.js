@@ -11,7 +11,6 @@ const EditUserModal = ({ isOpen, onClose, userToEdit, onUpdateUser, allSystemRol
     IsActive: true,
     RoleName: '', 
     Password: '', 
-    // ConfirmPassword: '' // Removed
   });
   const [error, setError] = useState('');
 
@@ -25,7 +24,6 @@ const EditUserModal = ({ isOpen, onClose, userToEdit, onUpdateUser, allSystemRol
         IsActive: userToEdit.IsActive !== undefined ? userToEdit.IsActive : true,
         RoleName: userToEdit.roles && userToEdit.roles.length > 0 ? userToEdit.roles[0].RoleName : '', 
         Password: '',
-        // ConfirmPassword: '' // Removed
       });
       setError('');
     }
@@ -43,11 +41,7 @@ const EditUserModal = ({ isOpen, onClose, userToEdit, onUpdateUser, allSystemRol
     e.preventDefault();
     setError('');
 
-    // Removed password confirmation check
-    // if (formData.Password && formData.Password !== formData.ConfirmPassword) {
-    //     setError('Passwords do not match.');
-    //     return;
-    // }
+    
     if (!formData.RoleName) { 
         setError('A role must be assigned.');
         return;
@@ -128,22 +122,7 @@ const EditUserModal = ({ isOpen, onClose, userToEdit, onUpdateUser, allSystemRol
               disabled={isSubmitting}
             />
           </div>
-          {/* Removed Confirm New Password Field */}
-          {/*
-          {formData.Password && ( 
-            <div className="form-group">
-              <label htmlFor="edit-confirmPassword">Confirm New Password:</label>
-              <input
-                id="edit-confirmPassword"
-                type="password"
-                name="ConfirmPassword"
-                value={formData.ConfirmPassword}
-                onChange={handleChange}
-                disabled={isSubmitting}
-              />
-            </div>
-          )}
-          */}
+          
 
           <div className="form-group">
             <label>Role<span className="required-asterisk">*</span>:</label>

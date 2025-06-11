@@ -1,11 +1,10 @@
-// src/pages/User/CreateUserModal.js (or src/components/Admin/CreateUserModal.js)
+// src/pages/User/CreateUserModal.js 
 import React, { useState, useEffect } from 'react';
-import './EditUserModal.css'; // Assuming a shared CSS file like UserModals.css or EditUserModal.css
+import './EditUserModal.css'; 
 
 const CreateUserModal = ({ isOpen, onClose, onCreateUser, allSystemRoles, isLoading: isSubmitting }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  // const [confirmPassword, setConfirmPassword] = useState(''); // Removed
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [selectedRoleName, setSelectedRoleName] = useState('');
@@ -16,7 +15,6 @@ const CreateUserModal = ({ isOpen, onClose, onCreateUser, allSystemRoles, isLoad
       // Reset form fields when modal opens
       setUsername('');
       setPassword('');
-      // setConfirmPassword(''); // Removed
       setEmail('');
       setFullName('');
       setSelectedRoleName('');
@@ -94,20 +92,6 @@ const CreateUserModal = ({ isOpen, onClose, onCreateUser, allSystemRoles, isLoad
               disabled={isSubmitting}
             />
           </div>
-          {/* Removed Confirm Password Field */}
-          {/*
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password<span className="required-asterisk">*</span>:</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-          */}
           <div className="form-group">
             <label htmlFor="email">Email:</label>
             <input
