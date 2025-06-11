@@ -29,11 +29,12 @@ export default function Dashboard() {
     const [showEditTaskModal, setShowEditTaskModal] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
 
-    // --- Memoized values for roles ---
+    // --- Grasp values for roles ---
     const userRoles = useMemo(() => new Set(user?.roles || []), [user]);
     const isAdmin = userRoles.has("admin");
     const canCreateTasks = isAdmin || userRoles.has("task_creator");
 
+    // Filters users to show only those with the “read_only_user” role 
     const assignableUsers = useMemo(() => {
         return allUsers.filter(u => u.roles?.some(r => r.RoleName === "read_only_user"));
     }, [allUsers]);
@@ -83,6 +84,7 @@ export default function Dashboard() {
     }, []);
 
     // Initial data fetch
+    // When the component mounts (or when user changes), it loads projects & users.
     useEffect(() => {
         if (user?.UserID) {
             fetchProjects();
@@ -91,6 +93,7 @@ export default function Dashboard() {
     }, [user, fetchProjects, fetchAllUsers]);
     
     // --- CRUD Handlers ---
+    // For Project
     const handleProjectCreated = useCallback(() => {
         fetchProjects();
         setShowCreateProjectModal(false);
@@ -121,7 +124,7 @@ export default function Dashboard() {
             }
         }
     };
-
+    // For Tasks
     const handleCreateTask = async (taskData) => {
         if (!selectedProject?.ProjectID) throw new Error("A project must be selected.");
         try {
@@ -235,7 +238,7 @@ export default function Dashboard() {
                     ) : (
                         <div className="info-container">
                              <img
-                            src="./task-tracker.png" // Ensure this path is correct from your public folder
+                            src="./task-tracker.png" 
                             alt="Task Tracker Logo"
                             className="header-logo"
                             />

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import api from "../../api"; // Using the centralized api instance
+import api from "../../api"; 
 
-// Add 'onCreate' to the props
 export default function CreateProjectModal({
-  isOpen,
+  isOpen, //whether modal is visible
   onClose,
   currentUserId,
-  onCreate,
+  onCreate, // Function: called after successful creation
 }) {
+  // Form input states
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -15,8 +15,10 @@ export default function CreateProjectModal({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // modal doesn’t render if it’s closed
   if (!isOpen) return null;
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -53,7 +55,7 @@ export default function CreateProjectModal({
     try {
       console.log("Sending project data:", projectData);
 
-      // --- MODIFICATION: Use the 'api' instance instead of 'fetch' ---
+      // -- Using the 'api' instance instead of 'fetch' ---
       // This ensures the Axios request interceptor attaches the auth token.
       const response = await api.post('/projects/', projectData);
 

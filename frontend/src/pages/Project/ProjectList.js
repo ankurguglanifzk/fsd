@@ -3,13 +3,13 @@ import React from 'react';
 // import './ProjectList.css'; // Make sure this file is imported and styled
 
 const ProjectList = ({
-  projects,
+  projects, // List of project 
   loading,
-  selectedProject,
-  onSelect,
+  selectedProject,// Currently selected project
+  onSelect,//  Callback when a project is clicked
   onStartEdit,
   onDelete,
-  isAdmin, // Receive isAdmin prop
+  isAdmin, // If true, shows edit/delete buttons
 }) => {
 
   if (loading) {
