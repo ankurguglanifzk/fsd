@@ -6,17 +6,21 @@ import Header from "../Header/Header";
 import "./LoginPage.css";
 
 export default function LoginPage() {
+    // Form fields
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
+
+    // UI state
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-
+    //  Authentication functions from context
     const { login, googleLogin } = useAuth();
     const navigate = useNavigate();
+    // Ref to hold the Google login button container
     const googleButtonRef = useRef(null);
-
+    // Google OAuth callback handler
     const handleGoogleCallback = useCallback(async (response) => {
         setIsLoading(true);
         setError("");
@@ -25,7 +29,7 @@ export default function LoginPage() {
         try {
             const result = await googleLogin(response.credential);
 
-            // MODIFIED: Added a check to ensure the result object is valid
+            // Added a check to ensure the result object is valid
             if (result && result.success) {
                 navigate("/dashboard");
             } else {
@@ -38,6 +42,7 @@ export default function LoginPage() {
         }
     }, [googleLogin, navigate]);
 
+    // Initialize the Google Sign-In button
     useEffect(() => {
         const initializeGoogleButton = () => {
             if (window.google && googleButtonRef.current) {
@@ -61,6 +66,7 @@ export default function LoginPage() {
         if (window.google) {
             initializeGoogleButton();
         } else {
+            // Dynamically load the Google script
             const script = document.createElement("script");
             script.src = "https://accounts.google.com/gsi/client";
             script.async = true;
@@ -78,7 +84,7 @@ export default function LoginPage() {
         }
     }, [handleGoogleCallback]);
 
-
+    // Handle traditional form login
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");

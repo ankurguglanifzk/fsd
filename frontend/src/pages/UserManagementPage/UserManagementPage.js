@@ -5,12 +5,13 @@ import UserList from '../../User/UserList';
 import CreateUserModal from '../../User/CreateUserModal';
 import EditUserModal from '../../User/EditUserModal'; 
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../../api'; // MODIFIED: Import the central api instance
+import api from '../../api'; 
 import './UserManagementPage.css'; 
 
 const UserManagementPage = () => {
-  // MODIFIED: 'apiFetch' is no longer provided by the context.
   const { user } = useAuth(); 
+  const isAdmin = user?.roles?.includes('admin');
+
   const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
@@ -23,8 +24,8 @@ const UserManagementPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [userToEdit, setUserToEdit] = useState(null);
 
-  const isAdmin = user?.roles?.includes('admin');
-
+  
+  // Only users with the admin role can see and interact with this page.
   // This effect correctly redirects non-admins.
   useEffect(() => {
     if (user === undefined) return; 
@@ -34,7 +35,7 @@ const UserManagementPage = () => {
     }
   }, [user, isAdmin, navigate]);
 
-  // MODIFIED: All data fetching now uses the 'api' object.
+  //  Fetch Users
   const fetchUsers = useCallback(async () => {
     if (!isAdmin) return;
     setIsLoading(true);
@@ -50,6 +51,7 @@ const UserManagementPage = () => {
     }
   }, [isAdmin]); 
 
+  // Fetch Roles
   const fetchAllSystemRoles = useCallback(async () => {
     if (!isAdmin) return;
     try {
@@ -60,7 +62,7 @@ const UserManagementPage = () => {
       setAllSystemRoles([]);
     }
   }, [isAdmin]); 
-
+  //Run on initial load
   useEffect(() => {
     if (isAdmin) {
       fetchUsers();
@@ -68,6 +70,7 @@ const UserManagementPage = () => {
     }
   }, [isAdmin, fetchUsers, fetchAllSystemRoles]); 
 
+  // Create user
   const handleCreateUser = async (userData) => {
     if (!isAdmin) throw new Error("Permission denied.");
     setIsSubmitting(true);
@@ -83,12 +86,12 @@ const UserManagementPage = () => {
       setIsSubmitting(false);
     }
   };
-
+  // Edit User modal 
   const handleOpenEditModal = (userForEdit) => {
     setUserToEdit(userForEdit);
     setShowEditModal(true);
   };
-
+  // Update User
   const handleUpdateUser = async (userId, userData) => {
     if (!isAdmin) throw new Error("Permission denied.");
     setIsSubmitting(true);
@@ -105,7 +108,7 @@ const UserManagementPage = () => {
       setIsSubmitting(false);
     }
   };
-
+  // Delete User
   const handleDeleteUser = async (userId) => {
     if (!isAdmin) {
         setError("Permission denied to delete user.");
@@ -132,7 +135,6 @@ const UserManagementPage = () => {
     return <div className="loading-container"><p>Access Denied. Redirecting...</p></div>;
   }
 
-  // The JSX structure remains the same
   return (
     <div className="user-management-page">
       <header className="ump-header">
