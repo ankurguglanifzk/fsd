@@ -11,7 +11,7 @@ const api = axios.create({
 // Use an interceptor to inject the token into every request
 api.interceptors.request.use(
   (config) => {
-    // MODIFIED: Retrieve 'access_token' to match the backend response
+    //  Retrieve 'access_token' to match the backend response
     const token = localStorage.getItem('access_token');
     
     // If the token exists, add it to the Authorization header
