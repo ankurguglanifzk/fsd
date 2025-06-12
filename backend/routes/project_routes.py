@@ -54,7 +54,7 @@ def serialize_project(project, include_tasks=False):
         project_data["tasks"] = [serialize_task_simple(t) for t in project.tasks] 
     return project_data
 
-# --- Project Routes (Updated with JWT) ---
+# --- Project Routes ( with JWT) ---
 
 @project_routes.route('/', methods=['POST'])
 @jwt_required
@@ -184,7 +184,6 @@ def delete_project(current_user, project_id):
     project = Project.query.get_or_404(project_id, description=f"Project ID {project_id} not found.")
     
     try:
-        # Assuming 'ondelete=CASCADE' is set on the Task.ProjectID ForeignKey
         db.session.delete(project)
         db.session.commit()
         

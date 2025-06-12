@@ -6,12 +6,8 @@ from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import IntegrityError
 from utils import jwt_required, role_required, create_access_token
 import os
-
-# --- CORRECTED IMPORTS ---
-# These are required to verify the Google ID token
 from google.oauth2 import id_token
 from google.auth.transport import requests as grequests
-# The 'from auth import oauth' line has been removed as it's for the old flow
 
 user_routes = Blueprint('user_routes', __name__)
 
@@ -23,7 +19,7 @@ def get_all_role_names():
     except Exception:
         return set()
 
-# --- Authentication (MODIFIED for JWT) ---
+# --- Authentication (for JWT) ---
 @user_routes.route('/login', methods=['POST'])
 def login():
     data = request.get_json()

@@ -109,7 +109,7 @@ def update_task(current_user, task_id):
     if not data:
         return jsonify({"message": "No input data for update"}), 400
 
-    # --- MODIFIED: Corrected authorization logic ---
+    # --- Authorization logic ---
     user_roles = {role.RoleName for role in current_user.roles}
     is_admin = 'admin' in user_roles
     is_creator = 'task_creator' in user_roles
@@ -125,7 +125,7 @@ def update_task(current_user, task_id):
 
     if not (can_update_generally or can_update_status_only):
         return jsonify({"message": "You are not authorized to perform this update."}), 403
-    # --- END MODIFICATION ---
+    
 
     try:
         # Admins and creators can update any of these fields
@@ -161,7 +161,6 @@ def update_task(current_user, task_id):
         db.session.rollback()
         return jsonify({"message": "Unexpected error during update.", "error": str(e)}), 500
 
-# --- The rest of the file is unchanged ---
 
 @task_routes.route('/', methods=['GET'])
 @jwt_required
@@ -191,7 +190,6 @@ def get_task(current_user, task_id):
 @task_routes.route('/<int:task_id>', methods=['DELETE'])
 @jwt_required
 def delete_task(current_user, task_id):
-    # ...
     task = Task.query.get_or_404(task_id, description=f"Task ID {task_id} not found.")
     
     user_roles = {role.RoleName for role in current_user.roles}
@@ -236,6 +234,5 @@ def get_my_assigned_tasks_endpoint(current_user):
 @task_routes.route('/owned', methods=['GET'])
 @jwt_required
 def get_my_owned_tasks_endpoint(current_user):
-    # ...
     tasks = Task.query.filter_by(OwnerUserID=current_user.UserID).order_by(Task.CreatedAt.desc()).all()
     return jsonify([serialize_task(t) for t in tasks]), 200

@@ -8,7 +8,6 @@ from flask import request, jsonify
 from models import User
 
 # --- JWT Configuration ---
-# In a real app, use a strong, securely stored secret key from environment variables
 SECRET_KEY = os.environ.get('SECRET_KEY', 'a-very-secure-secret-key-for-development')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # Token valid for 24 hours

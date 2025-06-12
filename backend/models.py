@@ -3,19 +3,11 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func # For default timestamps
 from werkzeug.security import generate_password_hash, check_password_hash # For password operations
-from datetime import datetime # Keep for type hinting or if func.now()/utcnow() is not preferred everywhere
+from datetime import datetime 
 
 db = SQLAlchemy()
 
-# Association table for the many-to-many relationship between Users and Roles
-# This is an alternative way to define a many-to-many relationship without an explicit model class
-# if UserRole doesn't have extra columns beyond UserID and RoleID.
-# However, since our UserRole has an AssignedAt and its own PK, an explicit model is better.
-# user_roles_table = db.Table('UserRoles',
-#     db.Column('UserID', db.Integer, db.ForeignKey('Users.UserID'), primary_key=True),
-#     db.Column('RoleID', db.Integer, db.ForeignKey('Roles.RoleID'), primary_key=True),
-#     db.Column('AssignedAt', db.DateTime, default=func.now()) # Example of extra data
-# )
+
 
 class User(db.Model):
     __tablename__ = 'Users'
@@ -35,8 +27,7 @@ class User(db.Model):
     
     # Many-to-many relationship with Role through UserRole model
     roles = db.relationship('Role', secondary='UserRoles', back_populates='users', lazy='dynamic')
-    # If using UserRole model directly for more complex queries:
-    # user_role_associations = db.relationship('UserRole', back_populates='user', lazy='dynamic', cascade="all, delete-orphan")
+    
 
 
     def set_password(self, password):
@@ -57,9 +48,7 @@ class Role(db.Model):
 
     # Many-to-many relationship with User through UserRole model
     users = db.relationship('User', secondary='UserRoles', back_populates='roles', lazy='dynamic')
-    # If using UserRole model directly:
-    # user_role_associations = db.relationship('UserRole', back_populates='role', lazy='dynamic', cascade="all, delete-orphan")
-
+    
 
     def __repr__(self):
         return f"<Role {self.RoleName}>"
@@ -75,10 +64,6 @@ class UserRole(db.Model):
 
     # Define a unique constraint for UserID and RoleID combination
     __table_args__ = (db.UniqueConstraint('UserID', 'RoleID', name='uq_user_role'),)
-
-    # Optional: define relationships back to User and Role if you query UserRole directly often
-    # user = db.relationship("User", back_populates="user_role_associations")
-    # role = db.relationship("Role", back_populates="user_role_associations")
 
 
     def __repr__(self):
