@@ -10,8 +10,8 @@
       "body": {
         "type": "json",
         "json": {
-          "Username": "readonlyuser",
-          "Password": "ReadOnly@123"
+          "Username": "adminuser",
+          "Password": "Admin@123"
         }
       }
     },

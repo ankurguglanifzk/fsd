@@ -76,10 +76,8 @@ def verify_google_token():
         idinfo = id_token.verify_oauth2_token(token, grequests.Request(), google_client_id)
         
         email = idinfo['email']
-        domain = email.split('@')[-1]
+        
 
-        if domain.lower() != "tigeranalytics.com":
-            return jsonify({'message': 'Login with this Google account domain is not allowed.'}), 403
 
         user = User.query.filter_by(Email=email).first()
 
