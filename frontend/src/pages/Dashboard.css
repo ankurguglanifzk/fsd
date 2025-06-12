@@ -38,11 +38,12 @@
 
 .username-text {
   font-weight: bold;
-  color: #0ea5e9; /* Sky blue color */
+  color: #0ea5e9;
 }
+
 .role-text {
   font-size: 1em;
-  color: #bcc1c8; /* Gray color */
+  color: #bcc1c8;
   margin: 0;
 }
 
@@ -85,7 +86,7 @@
 .project-list {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 1rem;
 }
 
 .project-list-item {
@@ -97,7 +98,9 @@
   margin-bottom: 0.5rem;
   transition: background-color 0.2s ease;
   word-break: break-word;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .project-list-item:hover {
@@ -109,9 +112,17 @@
   color: #ffffff;
 }
 .project-list-item.selected:hover {
-  background-color: #0056b3; /* Slightly darker when selected and hovered */
+  background-color: #0056b3;
 }
 
+.project-info {
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 0.75rem;
+  text-align: left;
+}
 
 .main-content {
   flex-grow: 1;
@@ -165,69 +176,77 @@
   cursor: not-allowed;
 }
 
-/* Task Table Styles */
 .task-table-container {
-  overflow-x: auto; /* Allows table to be scrollable horizontally if needed */
+  overflow-x: auto;
   margin-top: 1.5rem;
 }
 
 .task-table {
   width: 100%;
-  border-collapse: collapse; /* Removes space between borders */
-  color: #e0e0e0; /* Light text for dark theme */
+  border-collapse: collapse;
+  color: #e0e0e0;
 }
 
 .task-table th,
 .task-table td {
-  border: 1px solid #4a5568; /* Darker border, slate-700 equivalent */
-  padding: 0.75rem; /* Tailwind p-3 */
+  border: 1px solid #4a5568;
+  padding: 0.75rem;
   text-align: left;
-  font-size: 0.875rem; /* text-sm */
+  font-size: 0.875rem;
 }
 
 .task-table th {
-  background-color: #2d3748; /* Darker header, slate-800 equivalent */
-  color: #cbd5e1; /* Lighter text for headers, slate-300 */
-  font-weight: 600; /* semibold */
+  background-color: #2d3748;
+  color: #cbd5e1;
+  font-weight: 600;
 }
 
 .task-table tr:nth-child(even) {
-  background-color: #252d3a; /* Slightly different bg for even rows for readability */
+  background-color: #252d3a;
 }
 
 .task-table tr:hover {
-  background-color: #354052; /* Hover effect for rows */
+  background-color: #354052;
 }
 
 .task-table .task-description-cell {
-  max-width: 250px; /* Limit width of description */
+  max-width: 250px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Show ... for overflowed text */
-  cursor: help; /* Indicate that it can be hovered for full text (if tooltip added later) */
+  text-overflow: ellipsis;
+  cursor: help;
 }
 
-
-.task-table .status-new { color: #60a5fa; } /* blue-400 */
-.task-table .status-in-progress { color: #facc15; } /* yellow-400 */
-.task-table .status-blocked { color: #f87171; } /* red-400 */
-.task-table .status-completed { color: #4ade80; text-decoration: line-through; } /* green-400 */
-.task-table .status-not-started { color: #9ca3af; } /* gray-400 */
-
+.task-table .status-new {
+  color: #60a5fa;
+}
+.task-table .status-in-progress {
+  color: #facc15;
+}
+.task-table .status-blocked {
+  color: #f87171;
+}
+.task-table .status-completed {
+  color: #4ade80;
+  text-decoration: line-through;
+}
+.task-table .status-not-started {
+  color: #9ca3af;
+}
 
 .task-actions-cell {
   text-align: center;
-  white-space: nowrap; /* Prevent buttons from wrapping */
+  white-space: nowrap;
 }
 
 .task-action-button,
 .task-delete-button {
-  padding: 0.3rem 0.6rem; /* Smaller padding for table buttons */
+  padding: 0.3rem 0.6rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   color: white;
-  font-size: 0.8rem; /* Smaller font for table buttons */
+  font-size: 0.8rem;
   margin-right: 0.5rem;
   transition: background-color 0.2s ease;
 }
@@ -261,7 +280,6 @@
 .task-delete-button:disabled {
   background-color: #b02a37;
 }
-
 
 .error-message {
   color: #dc3545;
@@ -305,10 +323,7 @@
   opacity: 0.8;
 }
 
-/* In Dashboard.css */
-
-/* ... other styles ... */
-
+/* Project details styling */
 .project-details-header-compact {
   background-color: #2d3748;
   padding: 1rem 1.5rem;
@@ -337,22 +352,15 @@
   font-weight: 400;
 }
 
-/* MODIFIED STYLE FOR LINE TWO */
 .project-details-line-two {
   font-size: 1em;
-  color: #a0aec0; /* Medium gray text (slate-400) */
+  color: #a0aec0;
   display: flex;
-  justify-content: space-between; /* This will spread out the items */
-  align-items: center; /* Vertically align items if they have different heights */
-  flex-wrap: wrap; /* Allow wrapping on very small screens, though space-between might look odd then */
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .project-details-line-two span {
   white-space: nowrap;
-  /* If you want some padding around the items, you can add it here,
-     but space-between should handle the distribution.
-     e.g., padding: 0 0.25rem;
-  */
 }
-
-/* ... rest of your Dashboard.css ... */

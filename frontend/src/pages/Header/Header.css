@@ -3,52 +3,50 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem; /* 12px */
-  background-color: #fb8e20; /* gray-800 */
+  padding: 0.75rem;
+  background-color: #fb8e20;
   color: #ffffff;
   position: relative;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  height: 4.5rem; /* consistent height */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  height: 4.5rem;
 }
+
+/* Group for left side: logo + title */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* space between image and title */
+}
+
+.header-logo {
+  height: 5rem; /* Adjust size as needed */
+  width: auto;
+}
+
+/* Now positioned beside logo, not centered absolutely */
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Right side actions */
 .header-actions {
-  display: flex; /* To align buttons in a row */
+  display: flex;
   align-items: center;
 }
+
 .header-button {
-  /* Common styling for header buttons */
   background-color: transparent;
-  color: black; /* Example text color */
-  margin-right: 10px; /* Space between buttons */
+  color: black;
+  margin-right: 10px;
   border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  font-size: 0.7rem; 
-
+  font-size: 0.9rem;
   padding: 0.5rem 0.5rem;
-}
-
-
-/* Logo container and image */
-.logo-container {
-  display: flex;
-  align-items: center;
-}
-
-.header-logo {
-  height: 5rem; /* 48px */
-  width: auto;
-}
-
-/* Centered title */
-.header-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.75rem; /* ~28px */
-  font-weight: 700; /* bold */
-  color: #ffffff;
-  pointer-events: none; /* allow clicks to pass through */
 }
 
 /* Logout button */
@@ -68,8 +66,7 @@
 }
 
 .logout-button:hover {
-  background-color: #615654
-  ;
+  background-color: #615654;
 }
 
 .logout-button:focus {
@@ -77,8 +74,7 @@
   box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #ef4444;
 }
 
-/* Logout icon inside the button */
 .logout-icon {
-  width: 1.25rem; /* 20px */
+  width: 1.25rem;
   height: 1.25rem;
 }

@@ -42,7 +42,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin-right: 0.75rem; /* Increased space before action buttons */
+    margin-right: 0.75rem; 
+    text-align: left;/* Increased space before action buttons */
   }
   
   .project-actions {

@@ -1,6 +1,6 @@
 // src/components/ProjectList.js
 import React from 'react';
-// import './ProjectList.css'; // Make sure this file is imported and styled
+import './ProjectList.css'; 
 
 const ProjectList = ({
   projects, // List of project 
